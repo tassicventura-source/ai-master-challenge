@@ -1,0 +1,27 @@
+[
+  {
+    "file": "data/raw/ravenstack_accounts.csv",
+    "sha256": "348d8ba906b7776894b5236b2e7aa91a503d41670dbc9aad30c37b503c9abef5",
+    "matches_original_attachment": true
+  },
+  {
+    "file": "data/raw/ravenstack_churn_events.csv",
+    "sha256": "6391c41d8291b7b4845ec9a84d3837c2ed230a33a32a854ec33d4e66dc150940",
+    "matches_original_attachment": true
+  },
+  {
+    "file": "data/raw/ravenstack_feature_usage.csv",
+    "sha256": "c081da2be8caf987d07f0f79ceb0619aba523d819529230ed6df77984fa21d4e",
+    "matches_original_attachment": true
+  },
+  {
+    "file": "data/raw/ravenstack_subscriptions.csv",
+    "sha256": "dcf1d93ca9a35e0dcba0ab686d255f0e9ec26512970bbf0944cf19cbef2d751a",
+    "matches_original_attachment": true
+  },
+  {
+    "file": "data/raw/ravenstack_support_tickets.csv",
+    "sha256": "ba0006951479771ee9f93c98789c96bc5fec892cf11f867afb28194f0b76d220",
+    "matches_original_attachment": true
+  }
+]
