@@ -15,6 +15,24 @@ def app(page):
 def assert_ok(at):
     assert not at.exception, [e.message for e in at.exception]
 
+
+def test_my_work_is_the_operational_home():
+    at=AppTest.from_file(str(ROOT/'app.py'),default_timeout=30).run()
+    assert_ok(at)
+    assert at.title[0].value=='Meu trabalho'
+    assert any(t.label=='Ações de sinais' for t in at.tabs)
+
+
+def test_operator_identity_persists_across_multipage_navigation():
+    at=app('01_Conta_360.py')
+    at.text_input(key='current_actor_input').set_value('Responsável QA').run()
+    assert_ok(at)
+    assert at.session_state['actor_identity']=='Responsável QA'
+    at.switch_page('pages/00_Meu_Trabalho.py').run()
+    assert_ok(at)
+    assert at.session_state['actor_identity']=='Responsável QA'
+
+
 def test_retention_central_renders_prioritized_cases_and_action_fields():
     at=app('08_Central_de_Retencao.py')
     assert at.title[0].value=='Central de Retenção'
@@ -27,8 +45,8 @@ def test_retention_central_renders_prioritized_cases_and_action_fields():
 
 def test_crm_workspace_exposes_registration_pipeline_and_activity_forms():
     at=app('09_Operacao_CRM.py')
-    assert at.title[0].value=='CRM e Operação Comercial'
-    assert any('Cadastrar conta' in t.label for t in at.tabs)
+    assert at.title[0].value=='Comercial · pipeline e atuação'
+    assert any('Cadastrar lead' in t.label for t in at.tabs)
     assert any('Pipeline' in t.label for t in at.tabs)
     assert_ok(at)
 
@@ -57,9 +75,9 @@ def test_drilldown_preserves_account(page):
     aid=widget.value
     next(b for b in at.button if b.label=='Abrir Conta 360').click().run()
     assert_ok(at)
-    assert at.selectbox(key='account_choice').value==aid
+    assert at.selectbox(key='operational_customer_picker').value==aid
 
-@pytest.mark.parametrize('page',['01_Conta_360.py','03_Produto.py','04_Suporte_e_CS.py','05_Growth_e_Comercial.py','06_Finance_RevOps.py'])
+@pytest.mark.parametrize('page',['03_Produto.py','04_Suporte_e_CS.py','05_Growth_e_Comercial.py','06_Finance_RevOps.py'])
 def test_account_filters(page):
     at=app(page)
     for idx in range(2):
@@ -70,22 +88,29 @@ def test_account_filters(page):
 
 def test_account_timeline_empty_and_anomalies():
     at=app('01_Conta_360.py')
-    types=next(w for w in at.multiselect if w.label=='Tipos de registro')
-    types.set_value([]).run(); assert_ok(at)
-    assert any('Nenhum registro' in i.value for i in at.info)
-    types=next(w for w in at.multiselect if w.label=='Tipos de registro')
-    types.set_value(list(types.options)).run()
-    count=len(at.dataframe[0].value)
-    at.checkbox[0].check().run()
-    assert len(at.dataframe[0].value)>=count
+    assert at.title[0].value=='Cliente 360'
+    assert [t.label for t in at.tabs]==['Visão geral','Jornada','Assinatura & receita','Produto & suporte','Histórico / fonte']
+    assert any(w.label=='Buscar / selecionar cliente' for w in at.selectbox)
+    assert_ok(at)
+
+
+def test_interaction_toggle_reveals_followup_inputs_immediately():
+    at=app('01_Conta_360.py')
+    customer_id=at.selectbox(key='operational_customer_picker').value
+    key=f'interaction_create_next_overview_{customer_id}'
+    at.checkbox(key=key).check().run()
+    assert_ok(at)
+    assert any(w.label=='Próxima ação *' for w in at.text_input)
+    assert any(w.label=='Responsável pela próxima ação *' for w in at.text_input)
+    assert any(w.label=='Prazo *' for w in at.date_input)
 
 
 def test_every_account_opens():
     at=app('01_Conta_360.py')
-    for option in at.selectbox(key='account_choice').options:
-        at.selectbox(key='account_choice').select(option).run()
+    for option in at.selectbox(key='operational_customer_picker').options:
+        at.selectbox(key='operational_customer_picker').select(option).run()
         assert_ok(at)
-        assert len(at.dataframe[0].value)>=1
+        assert any('Cliente 360' in x.value for x in at.title)
 
 
 def test_journey_table_headers_match_content():

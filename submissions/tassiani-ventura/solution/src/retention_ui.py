@@ -51,6 +51,9 @@ def _action_summary(area: str | None = None) -> tuple[int, int, int]:
 
 
 def _show_action_editor(signal: pd.Series, scope: str) -> None:
+    flash = st.session_state.pop("retention_action_flash", None)
+    if flash:
+        st.success(flash)
     existing = list_actions(signal_id=str(signal.signal_id))
     selected_action = None
     if existing:
@@ -101,7 +104,7 @@ def _show_action_editor(signal: pd.Series, scope: str) -> None:
                 observation=observation, result=result,
                 action_id=initial_action.get("action_id"),
             )
-            st.success(f"Ação persistida · ID {saved_id[:8]} · modo demo SQLite.")
+            st.session_state["retention_action_flash"] = f"Ação persistida · ID {saved_id[:8]} · modo demo SQLite."
             st.rerun()
         except ValueError as exc:
             st.error(str(exc))
@@ -218,10 +221,14 @@ def _render_queue(rows: pd.DataFrame, scope: str) -> None:
     if rows.empty:
         st.info("Nenhum sinal nesta combinação de filtros.")
         return
+    requested_signal = st.session_state.pop("requested_signal_id", None)
     st.caption(f"{len(rows)} sinais · a tabela não é uma classificação de churn confirmado.")
     page_size = 25
     page_count = max(1, (len(rows) + page_size - 1) // page_size)
     page_key = f"queue_page_{scope}"
+    if requested_signal and rows.signal_id.astype(str).eq(str(requested_signal)).any():
+        requested_position = int(rows.index[rows.signal_id.astype(str).eq(str(requested_signal))][0])
+        st.session_state[page_key] = requested_position // page_size + 1
     current_page = min(max(int(st.session_state.get(page_key, 1)), 1), page_count)
     st.session_state[page_key] = current_page
     page = st.number_input("Página da fila", min_value=1, max_value=page_count,
@@ -234,7 +241,12 @@ def _render_queue(rows: pd.DataFrame, scope: str) -> None:
     })
     st.dataframe(shown, hide_index=True, width="stretch")
     labels = [_signal_label(row) for _, row in page_rows.iterrows()]
-    selected_label = st.selectbox("Conta/situação para decidir", labels, key=f"signal_choice_{scope}")
+    signal_key = f"signal_choice_{scope}"
+    if requested_signal:
+        target = page_rows[page_rows.signal_id.astype(str).eq(str(requested_signal))]
+        if not target.empty:
+            st.session_state[signal_key] = _signal_label(target.iloc[0])
+    selected_label = st.selectbox("Conta/situação para decidir", labels, key=signal_key)
     signal = page_rows.iloc[labels.index(selected_label)]
     with st.container(border=True):
         _show_detail(signal, scope)

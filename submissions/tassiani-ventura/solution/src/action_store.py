@@ -1,6 +1,10 @@
 from __future__ import annotations
 
-"""SQLite-backed demo action log. Replace with a shared authenticated service in production."""
+"""Retention actions with SQLite demo and PostgreSQL persistence adapters.
+
+The event log is auditable at the application layer; production still requires
+authenticated identity, authorization, and versioned database migrations.
+"""
 
 from datetime import date, datetime, timezone
 from contextlib import closing
@@ -10,6 +14,8 @@ from pathlib import Path
 import sqlite3
 import uuid
 from typing import Any
+from functools import lru_cache
+from sqlalchemy import Column, ForeignKey, Integer, MetaData, String, Table, Text, create_engine, insert, select, update
 
 ROOT = Path(__file__).resolve().parents[1]
 DB_PATH = Path(os.getenv("RETENTION_DB_PATH", str(ROOT / "data" / "retention_actions.sqlite")))
@@ -95,6 +101,59 @@ CREATE TABLE IF NOT EXISTS crm_events (
 CREATE INDEX IF NOT EXISTS idx_crm_events_entity ON crm_events(entity_type,entity_id,event_id);
 """
 
+_pg_metadata = MetaData()
+_pg_actions = Table(
+    "op_retention_actions", _pg_metadata,
+    Column("action_id", String(80), primary_key=True), Column("signal_id", String(240), nullable=False),
+    Column("area", String(120), nullable=False), Column("account_id", String(160), nullable=False),
+    Column("account_name", String(300), nullable=False), Column("title", Text, nullable=False),
+    Column("action_text", Text, nullable=False), Column("owner", String(240), nullable=False),
+    Column("priority", String(80), nullable=False), Column("due_date", String(10), nullable=False),
+    Column("status", String(30), nullable=False), Column("observation", Text, nullable=False),
+    Column("result", Text, nullable=False), Column("signal_snapshot_json", Text, nullable=False),
+    Column("created_at", String(40), nullable=False), Column("updated_at", String(40), nullable=False),
+)
+_pg_action_events = Table(
+    "op_retention_action_events", _pg_metadata,
+    Column("event_id", Integer, primary_key=True, autoincrement=True),
+    Column("action_id", String(80), ForeignKey("op_retention_actions.action_id"), nullable=False),
+    Column("event_at", String(40), nullable=False), Column("event_type", String(30), nullable=False),
+    Column("changed_fields_json", Text, nullable=False),
+)
+
+
+def _postgres_url() -> str | None:
+    value = (os.getenv("DATABASE_URL") or os.getenv("RAVENSTACK_DATABASE_URL") or "").strip()
+    if not value:
+        try:
+            import streamlit as st
+            value = str(st.secrets.get("DATABASE_URL") or st.secrets.get("RAVENSTACK_DATABASE_URL") or "").strip()
+        except Exception:
+            value = ""
+    if not value:
+        return None
+    if value.startswith("postgres://"):
+        return value.replace("postgres://", "postgresql+psycopg://", 1)
+    if value.startswith("postgresql://"):
+        return value.replace("postgresql://", "postgresql+psycopg://", 1)
+    return value
+
+
+def _uses_postgres(path: str | Path | None) -> bool:
+    return path is None and bool(_postgres_url())
+
+
+@lru_cache(maxsize=4)
+def _pg_engine(url: str):
+    return create_engine(url, pool_pre_ping=True, future=True)
+
+
+def _initialize_postgres():
+    url = _postgres_url()
+    if not url:
+        return
+    _pg_metadata.create_all(_pg_engine(url))
+
 
 def _timestamp() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
@@ -121,7 +180,22 @@ def _json(value: Any) -> str:
 
 
 def list_actions(*, area: str | None = None, signal_id: str | None = None,
+                 account_id: str | None = None,
                  open_only: bool = False, path: str | Path | None = None) -> list[dict[str, Any]]:
+    if _uses_postgres(path):
+        _initialize_postgres()
+        stmt = select(_pg_actions)
+        if area:
+            stmt = stmt.where(_pg_actions.c.area == area)
+        if signal_id:
+            stmt = stmt.where(_pg_actions.c.signal_id == signal_id)
+        if account_id:
+            stmt = stmt.where(_pg_actions.c.account_id == account_id)
+        if open_only:
+            stmt = stmt.where(_pg_actions.c.status.notin_(["Concluída", "Cancelada"]))
+        stmt = stmt.order_by(_pg_actions.c.priority, _pg_actions.c.due_date, _pg_actions.c.updated_at.desc())
+        with _pg_engine(_postgres_url()).connect() as conn:
+            return [dict(x) for x in conn.execute(stmt).mappings()]
     initialize(path)
     clauses: list[str] = []
     params: list[Any] = []
@@ -131,6 +205,9 @@ def list_actions(*, area: str | None = None, signal_id: str | None = None,
     if signal_id:
         clauses.append("signal_id = ?")
         params.append(signal_id)
+    if account_id:
+        clauses.append("account_id = ?")
+        params.append(account_id)
     if open_only:
         clauses.append("status NOT IN ('Concluída','Cancelada')")
     query = "SELECT * FROM retention_actions"
@@ -185,6 +262,35 @@ def save_action(*, signal: dict[str, Any], action_text: str, owner: str,
     if values["priority"] not in ("P1 — verificar primeiro", "P2 — próxima execução", "P3 — revisão planejada"):
         raise ValueError("Prioridade inválida.")
 
+    if _uses_postgres(path):
+        _initialize_postgres()
+        with _pg_engine(_postgres_url()).begin() as conn:
+            current = conn.execute(select(_pg_actions).where(_pg_actions.c.action_id == action_id)).mappings().first()
+            if current is None:
+                conn.execute(insert(_pg_actions).values(
+                    action_id=action_id, signal_id=values["signal_id"], area=values["area"],
+                    account_id=values["account_id"], account_name=values["account_name"], title=values["title"],
+                    action_text=values["action_text"], owner=values["owner"], priority=values["priority"],
+                    due_date=values["due_date"], status=values["status"], observation=values["observation"],
+                    result=values["result"], signal_snapshot_json=snapshot, created_at=now, updated_at=now))
+                event_type = "created"
+                changed = values | {"signal_snapshot_json": signal}
+            else:
+                if current["signal_id"] != signal_id:
+                    raise ValueError("A ação não pode ser associada a outro sinal.")
+                changed = {k: v for k, v in values.items() if current[k] != v}
+                if changed:
+                    conn.execute(update(_pg_actions).where(_pg_actions.c.action_id == action_id).values(
+                        action_text=values["action_text"], owner=values["owner"], priority=values["priority"],
+                        due_date=values["due_date"], status=values["status"], observation=values["observation"],
+                        result=values["result"], signal_snapshot_json=snapshot, updated_at=now))
+                    event_type = "updated"
+                else:
+                    event_type = "unchanged"
+            conn.execute(insert(_pg_action_events).values(action_id=action_id, event_at=now,
+                event_type=event_type, changed_fields_json=_json(changed)))
+        return action_id
+
     initialize(path)
     with closing(_connect(path)) as conn:
         conn.execute("BEGIN IMMEDIATE")
@@ -223,6 +329,11 @@ def save_action(*, signal: dict[str, Any], action_text: str, owner: str,
 
 
 def list_events(action_id: str, *, path: str | Path | None = None) -> list[dict[str, Any]]:
+    if _uses_postgres(path):
+        _initialize_postgres()
+        stmt = select(_pg_action_events).where(_pg_action_events.c.action_id == action_id).order_by(_pg_action_events.c.event_id)
+        with _pg_engine(_postgres_url()).connect() as conn:
+            return [dict(x) for x in conn.execute(stmt).mappings()]
     initialize(path)
     with closing(_connect(path)) as conn:
         return [dict(row) for row in conn.execute(

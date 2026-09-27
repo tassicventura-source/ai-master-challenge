@@ -1,52 +1,28 @@
-# Validação final — Sistema Operacional de Retenção e CRM demo
+# Validação — RavenStack Customer Journey
 
-**Execução desta revisão:** 26/09/2026, Linux/Python 3.12.14. Este relatório distingue a linha de base histórica do resultado nesta cópia local da branch.
+**Execução:** 2026-09-27 · Python 3.12 / Streamlit 1.64 · sandbox atual. A prévia Streamlit temporária está disponível no link compartilhado no handoff.
 
-## Linha de base antes da camada operacional
+## E2E Playwright aprovado
 
-O Streamlit existente respondeu ao endpoint de saúde; sua suíte original tinha **35 testes aprovados**. O smoke test anterior percorria as páginas da análise, baixava recortes e verificava Conta 360/drill-down em viewport de 390 px. Documentos, CSVs e regras analíticas recebidos permaneceram preservados.
+Comando: `RAVEN_PYTHON=python RAVEN_BROWSER_EXECUTABLE=/usr/bin/chromium npm run test:browser`.
 
-## Resultado desta revisão
+Resultado: **exit 0**, cobrindo cadastro nativo e Cliente 360 (A01/A02), interação e follow-up atribuído (A05/A06), concluir tarefa com evento (A07), tratar alerta conservando histórico (A11), alteração de MRR com delta +300 (A08/A12), encerramento administrativo sem churn e perda total explicitamente confirmada (A09/A10), ação de sinal persistida, uso e validação parcial de conta legacy sem mudar fontes (A03/A04/A13/A14), 22 rotas e viewport **390×844 sem overflow horizontal** (A15). Evidência detalhada em `docs/browser-results.json`; capturas em `docs/screenshots/`.
 
-- `python scripts/build_data.py`: aprovado; reconstruiu 500 accounts, 5.000 subscriptions, 25.000 eventos de uso, 2.000 tickets, 600 eventos legados, 500 Account 360 e oito linhas de quality summary.
-- `python -m pytest -q -W error::DeprecationWarning`: **55 testes aprovados, sem warnings**. Inclui os testes anteriores, CRUD/auditoria para CRM, atividades/follow-ups e a página CRM no AppTest.
-- `python -m compileall -q app.py pages src scripts tests`: aprovado.
-- `python -m pip check`: `No broken requirements found.`
-- `git diff --check`: aprovado.
-- Chromium Playwright: servidor local health `ok`; 10 rotas; drill-down Finance → Conta 360; cadastro de lead, responsável comercial, atividade e follow-up; atividade do lead visível na Conta 360; criação de ação de retenção desktop/mobile; download de CSV; zero erros de página; todos os viewports de 390×844 com largura do documento = 390 (sem overflow horizontal). Veja `browser-results.json` e as capturas de `screenshots/`.
-- Reinício de processo real: conta, etapa e atividade/follow-up foram recuperados do SQLite no novo processo Python.
-- Streamlit Community Cloud: push/rebuild do commit `49582cf` na branch `submission/tassiani-ventura` concluído; logs mostraram dependências instaladas e Uvicorn iniciado com Python 3.14.7. A URL pública e a rota `/Operacao_CRM` foram abertas e exibiram cadastro/pipeline sem erro. Não foi cadastrado dado de cliente no deployment público.
+O E2E revelou e levou à correção de um bug real: `preview_subscription_change` exigia ID de assinatura a substituir mesmo quando `create_parallel=True`. A prévia agora soma linhas vigentes e não confunde inclusão paralela com substituição; regressão dedicada cobre delta +350. Também ajustados flash após rerun e roteiro Playwright (menus React Aria, expander, viewport/hrefs mobile).
 
-| Cobertura | Resultado |
-|---|---|
-| Quatro áreas e regras determinísticas com IDs estáveis | Aprovado; 939 sinais do recorte histórico derivado das fontes (sem score ou estado atual inferido) |
-| Coorte Growth 2024 × Organic × Enterprise × D90 | Aprovado; 22 casos, 14 com e 8 sem evento legado |
-| Produto | Aprovado; erros dentro da janela e limiar explícito ≥ 5 por conta × feature |
-| CS/Suporte | Aprovado; somente urgent/escalated em ou após signup |
-| Finance/RevOps | Aprovado; 600 linhas no grão de evento, sem transformar `churn_event` em perda econômica |
-| Central, quatro filas e Conta 360 | Aprovado; filas filtráveis, paginação de 25, detalhes e ações |
-| CRM demo | Aprovado; cadastro, associação por ID, pipeline/owner/valor estimado e atividades atribuídas a área/responsável |
-| Follow-up e resultado | Aprovado; próxima ação precisa de prazo; concluir atividade exige resultado declarado; Conta 360 liga interação ao mesmo ID |
-| Auditoria e persistência | Aprovado no SQLite de demo; eventos de criação/alteração e leitura após reiniciar processo |
-| Browser desktop/mobile | Aprovado em 1440×1000 e 390×844; navegação, cadastro, atuação/follow-up, ações, downloads e drill-down |
-| Cinco fontes originais | SHA-256 após build idênticos aos CSVs recebidos; detalhes em `data/audit/` |
+## Testes Python
 
-## Critérios analíticos preservados
+- Suíte completa pós-correções: **88 passed em 212.36s**, com `-W error::DeprecationWarning`.
+- Após fix de assinatura paralela e lifecycle: **2 testes direcionados passaram**.
+- `python -m compileall -q app.py pages src scripts tests`, três AppTests, `pip check` e `git diff --check`: passaram após os fixes.
 
-A regra de elegibilidade D90 e a flag legada `is_reactivation` mantêm a semântica anterior. Permanecem explícitos os 400/500 registros divergentes entre indicadores de churn, 531/600 eventos com linha paga vigente, 67 antes do primeiro pagamento, 2 entre linhas, 5.568/25.000 usos dentro da janela e 1.077/2.000 tickets pré-signup. São dados sintéticos com cutoff em 31/12/2024; erro/uso/ticket não prova churn, e crédito/reembolso informado não confirma caixa ou perda.
+## Integridade e regras preservadas
 
-O CRM standalone não altera fontes, Conta 360 canônica, regras históricas ou sistemas externos. Um lead novo não recebe histórico ou valor de receita inventado. Owners/resultados são dados informados pelo operador demo; “Concluída” é status declarado, não outcome econômico verificado.
+SQLAlchemy com SQLite local e suporte de configuração PostgreSQL. Seed idempotente de 500 registros legacy; campos/estado contratual só ficam atuais após confirmação operacional. Testes preservam SHA-256 das cinco fontes. `churn_event`, uso/ticket, refund informado e fechamento administrativo não são considerados por si só prova de churn ou perda econômica. Arquivos históricos permanecem read-only.
 
-## Capturas e artefatos
+## Limitações
 
-- `browser-results.json` registra as dez rotas, drill-down, downloads, fluxo CRUD e largura dos viewports.
-- `screenshots/crm-e-opera--o-comercial-desktop.png` e `screenshots/crm-e-opera--o-comercial-mobile.png` mostram o CRM em desktop e mobile após o fluxo de teste.
-- `screenshots/00-central-desktop.png` e `screenshots/00-central-mobile.png` mostram a Central.
-- As outras capturas guardam a revisão visual das páginas existentes.
-- Os CSVs originais foram comparados por SHA-256 antes do empacotamento; conteúdo idêntico.
-
-## Limites
-
-A validação é automatizada/técnica e inspeção visual; não é pesquisa de usabilidade com operadores reais, homologação de especialistas, teste de carga multiusuário, teste de segurança, acessibilidade completa ou certificação de resultados. Windows não foi executado. Não há autenticação/RBAC, provedor compartilhado persistente, sincronização por API, histórico de imports CRM, nem escrita em CRM/billing/helpdesk.
-
-O SQLite local demonstra persistência enquanto o arquivo e disco persistirem. Streamlit Community Cloud pode apagar/recriar o armazenamento e não o compartilha de forma garantida entre réplicas. **Não usar a URL pública com dados reais ou confidenciais.** O deployment verificado demonstra a execução do fluxo CRUD, mas não é um CRM de produção seguro/system of record até conectar autenticação e armazenamento persistente compartilhado.
+- Sem instância/credenciais Postgres para teste de integração; não há Alembic nem migração automática dos bancos SQLite antigos.
+- SQLite local persiste enquanto o arquivo existe, mas pode desaparecer/não ser compartilhado no Streamlit Community Cloud; usar Postgres gerenciado nos Secrets (`DATABASE_URL`) para dados duráveis.
+- Não há autenticação/SSO/RBAC; ator e responsável são autodeclarados. Não usar PII em deployment público.
+- Preview desta sessão é temporária, sem promessa de permanência após encerramento do sandbox. Push/clone limpo ainda pendentes.

@@ -1,112 +1,60 @@
 {
   "health": "ok",
-  "routes": [
+  "results": [
     {
-      "action": "created",
-      "owner": "QA Retenção",
-      "persisted": true
+      "criterion": "A15",
+      "home": "Meu trabalho"
     },
     {
-      "route": "Central de Retenção"
+      "criterion": "A01/A02",
+      "customer": "Conta E2E 1790508584588",
+      "validated": true,
+      "opened": true
     },
     {
-      "crm": "created lead, assigned commercial owner, recorded interaction and follow-up",
-      "persisted": true
+      "criterion": "A05/A06",
+      "interaction": true,
+      "taskAssigned": "QA Browser RavenStack"
     },
     {
-      "crm": "lead activities visible in Conta 360",
-      "connected": true
+      "criterion": "A07",
+      "completed": true,
+      "auditEvent": true
     },
     {
-      "route": "CRM e operação comercial"
+      "criterion": "A11",
+      "alertTreated": true,
+      "historyPreserved": true
     },
     {
-      "route": "Visão executiva"
+      "criterion": "A08/A12",
+      "subscriptionChange": true,
+      "delta": 300
     },
     {
-      "route": "Conta 360",
-      "csv": "jornada_A-2e4581.csv",
-      "bytes": 1425
+      "criterion": "A09/A10",
+      "explicitLoss": true,
+      "administrativeEndPreservesRemainingActiveLine": true
     },
     {
-      "route": "Growth e Comercial",
-      "csv": "growth_por_origem.csv",
-      "bytes": 605
+      "criterion": "signal-action",
+      "persisted": true,
+      "owner": "QA Browser RavenStack"
     },
     {
-      "route": "Produto",
-      "csv": "produto_contas.csv",
-      "bytes": 14660
+      "criterion": "A03/A04/A13/A14",
+      "legacyUsed": true,
+      "partialValidation": true,
+      "interactionAndTaskAllowed": true,
+      "sourcePreserved": true
     },
     {
-      "route": "Suporte e CS",
-      "csv": "suporte_prioridades.csv",
-      "bytes": 427
+      "routes": 22,
+      "allOpened": true
     },
     {
-      "route": "Finance e RevOps",
-      "csv": "finance_eventos.csv",
-      "bytes": 48410
-    },
-    {
-      "route": "Jornada e áreas"
-    },
-    {
-      "route": "Dados e arquitetura"
-    },
-    {
-      "drilldown": "Finance → Conta 360",
-      "ok": true
-    },
-    {
-      "action": "created-mobile",
-      "owner": "QA Mobile",
-      "persisted": true
-    },
-    {
-      "mobileWidth": 390,
-      "documentWidth": 390,
-      "clientWidth": 390
-    },
-    {
-      "mobile": "Central de Retenção",
-      "documentWidth": 390
-    },
-    {
-      "mobile": "CRM e operação comercial",
-      "documentWidth": 390
-    },
-    {
-      "mobile": "Visão executiva",
-      "documentWidth": 390
-    },
-    {
-      "mobile": "Conta 360",
-      "documentWidth": 390
-    },
-    {
-      "mobile": "Growth e Comercial",
-      "documentWidth": 390
-    },
-    {
-      "mobile": "Produto",
-      "documentWidth": 390
-    },
-    {
-      "mobile": "Suporte e CS",
-      "documentWidth": 390
-    },
-    {
-      "mobile": "Finance e RevOps",
-      "documentWidth": 390
-    },
-    {
-      "mobile": "Jornada e áreas",
-      "documentWidth": 390
-    },
-    {
-      "mobile": "Dados e arquitetura",
-      "documentWidth": 390
+      "viewport": "390x844",
+      "horizontalOverflow": false
     }
   ],
   "pageErrors": []

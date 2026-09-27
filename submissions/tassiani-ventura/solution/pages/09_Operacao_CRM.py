@@ -1,7 +1,5 @@
 import streamlit as st
+from src.operational_ui import render_operational_shell, render_sales_workspace
 
-from src.crm_ui import render_crm_workspace
-from src.ui import setup_page
-
-setup_page(st, "CRM e operação comercial")
-render_crm_workspace()
+render_operational_shell()
+render_sales_workspace()
