@@ -6,7 +6,7 @@
 - **LinkedIn:** https://www.linkedin.com/in/tassianiventura/
 - **Challenge escolhido:** 001 — Diagnóstico de Churn
 
-Minha trajetória passou por conteúdo, gestão de projetos, liderança, processos, conteúdo e aquisição, dentro do marketing digital. Hoje sigo trabalhando isso, conectando liderança e produtividade. Acredito que pessoas, processos e tecnologia são pilares fundamentais hoje em dia. Foi isso que quis explorar neste desafio. 
+Minha trajetória passou por conteúdo, gestão de projetos, liderança, processos e aquisição, dentro do marketing digital. Hoje sigo trabalhando isso, conectando liderança e produtividade. Acredito que pessoas, processos e tecnologia são pilares fundamentais hoje em dia. Foi isso que quis explorar neste desafio.
 
 ---
 
@@ -140,7 +140,7 @@ Meu papel foi principalmente **questionar o enquadramento**, decidir quais pergu
 
 ### Iterações
 
-Eu não contabilizei cada ida e volta com a IA como uma iteração separada, então não seria correto apresentar um número exato de prompts ou trocas. A unidade auditável no Process Log é outra: ele registra **16 marcos/ciclos principais de trabalho**, dos quais **5 são análises formalmente numeradas (001 a 005)** e **11 são ciclos adicionais** de estruturação, revisão do diagnóstico, desenho da solução, construção/reconstrução do MVP, UX, validação, documentação e fechamento da entrega. O número real de interações com IA foi maior; a cronologia completa e as evidências estão preservadas no Process Log.
+Ao final, fiz uma auditoria dos chats e identifiquei **45 ciclos relevantes**: aproximadamente **21 ligados à investigação e análise dos dados, 12 à construção dos relatórios e 12 ao produto, sistema e implementação**.
 
 ---
 
