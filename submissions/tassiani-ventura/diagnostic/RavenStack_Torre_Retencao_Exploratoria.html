@@ -227,7 +227,7 @@ footer.foot{margin-top:56px; padding-top:18px; border-top:1px solid var(--line);
   <section id="sec-queue">
     <div class="section-head"><div class="section-label">Protótipo de triagem</div><h2>Fila exploratória de contas com múltiplos sinais</h2><p>Esta fila demonstra uma regra explicável baseada em sinais registrados. <strong>Não é um score validado de churn</strong> e não deve acionar intervenção automática.</p></div>
     <div class="queue-note" id="queue-note"></div>
-    <div class="table-scroll"><table class="data"><thead><tr><th>Conta</th><th>Indústria</th><th>Plano</th><th>Canal</th><th>MRR</th><th>Sinal de alerta</th></tr></thead><tbody id="queue-body"></tbody></table></div>
+    <div class="table-scroll"><table class="data"><thead><tr><th>Conta</th><th>Indústria</th><th>Plano</th><th>Canal</th><th>Sinais registrados</th></tr></thead><tbody id="queue-body"></tbody></table></div>
   </section>
 </div>
 
@@ -306,18 +306,14 @@ const GLOSSARY = {
   unknown: "O cliente saiu sem que o motivo fosse registrado no cancelamento."
 };
 const EXPLAIN = {
-  kpi_base:{title:"Contas na base", body:"<p><b>Fórmula:</b> linhas de accounts.csv que atendem o filtro de canal e plano.</p><p>Contagem direta, não estimativa.</p>"},
-  kpi_churn:{title:"Churn confirmado hoje", body:"<p><b>Fórmula:</b> contas com churn_flag = verdadeiro ÷ total da base filtrada.</p><p>Foto do status mais recente — não muda com período, só com canal e plano.</p>"},
-  kpi_events:{title:"Eventos de saída no período", body:"<p><b>Fórmula:</b> linhas de churn_events.csv no período selecionado, para contas do filtro de canal/plano.</p><p>Um evento é um registro de saída — a mesma conta pode gerar mais de um se saiu, voltou e saiu de novo.</p>"},
-  kpi_mrr_risk:{title:"MRR em risco", body:"<p><b>Fórmula:</b> soma do MRR mais recente das contas com churn_flag = verdadeiro, no filtro atual.</p><p>Aproximação — não é o valor exato de fatura no dia da saída.</p>"},
-  kpi_mrr_total:{title:"MRR total da base", body:"<p><b>Fórmula:</b> soma do MRR mais recente de todas as contas no filtro atual.</p>"},
-  kpi_refund:{title:"Reembolsos no período", body:"<p><b>Fórmula:</b> soma de refund_amount_usd nos eventos do filtro atual.</p><p>1 em cada 4 eventos tem algum valor registrado — a maioria não tem.</p>"},
-  j_signup:{title:"Cadastro", body:"<p>500 contas — toda conta que já passou pelo cadastro, incluindo as que já saíram.</p><p style='color:var(--muted);font-size:12px;'>Lista de contas não aplicável — é a base inteira.</p>"},
-  j_trial:{title:"Ainda em trial", body:"<p>97 contas têm is_trial = verdadeiro hoje.</p><p>Não sabemos, só com este número, quantas convertem — pediria acompanhar cada trial pela data de início.</p><p style='color:var(--muted);font-size:12px;'>Lista de contas não disponível nesta versão.</p>"},
-  j_upgrade:{title:"Já fez upgrade", body:"<p>307 contas (61,4%) têm ao menos um upgrade registrado no histórico de assinatura.</p><p style='color:var(--muted);font-size:12px;'>Lista de contas não disponível nesta versão — o dado de upgrade fica em subscriptions.csv, não trazido linha a linha aqui.</p>"},
-  j_downgrade:{title:"Já fez downgrade", body:"<p>177 contas (35,4%) têm ao menos um downgrade registrado.</p><p style='color:var(--muted);font-size:12px;'>Lista de contas não disponível nesta versão.</p>"},
-  seg_help:{title:"Como ler esta tabela", body:"<p><b>Taxa de churn:</b> % de contas do segmento com churn_flag = verdadeiro.</p><p><b>MRR em risco:</b> % do MRR do segmento que está hoje com contas churned.</p><p>Segmentos com poucas contas têm taxa mais instável.</p>"}
-};
+  kpi_base:{title:'Contas na base', body:'<p>Linhas de accounts.csv que atendem ao filtro de canal e plano.</p>'},
+  kpi_churn:{title:'Flag registrada em accounts', body:'<p>accounts.churn_flag = true é uma classificação do dataset, não uma taxa validada de perda econômica.</p>'},
+  kpi_events:{title:'Churn events registrados', body:'<p>Linhas de churn_events.csv no período/filtro. Um evento não equivale automaticamente a saída definitiva.</p>'},
+  kpi_mrr_risk:{title:'Contas com evento', body:'<p>Quantidade de contas distintas com ao menos um churn_event no filtro atual.</p>'},
+  kpi_mrr_total:{title:'Refund/crédito registrado', body:'<p>Soma de refund_amount_usd. A documentação admite refund ou crédito; não é receita perdida comprovada.</p>'},
+  kpi_refund:{title:'Eventos com refund/crédito', body:'<p>Quantidade de eventos com refund_amount_usd positivo.</p>'},
+  seg_help:{title:'Como ler esta tabela', body:'<p>A tabela mostra a incidência da classificação accounts.churn_flag por segmento. Use como sinal descritivo, não como churn econômico validado.</p>'}
+}
 
 function fmtPct(n){return n.toFixed(1).replace('.', ',')+'%';}
 function fmtUSD(n){return '$'+Math.round(n).toLocaleString('en-US');}
@@ -422,13 +418,16 @@ document.querySelectorAll('#sec-reasons .chip').forEach(el=>el.addEventListener(
   document.querySelectorAll('#sec-reasons .chip').forEach(c=>c.classList.remove('active')); el.classList.add('active'); reasonMetric = el.dataset.metric; renderAll();
 }));
 
-const JOURNEY = [['j_signup','Cadastro',500,'100% da base'],['j_trial','Ainda em trial',97,'19,4% hoje'],['j_upgrade','Já fez upgrade',307,'61,4%'],['j_downgrade','Já fez downgrade',177,'35,4%'],['j_exit','Teve saída registrada',352,'70,4% · inclui quem voltou'],['j_react','Reativação bem-sucedida',43,'78% de 55 tentativas'],['j_churn_now','Churn confirmado',110,'22,0% · status atual']];
+const JOURNEY = [
+  ['j_signup','Contas cadastradas',500,'100% da base'],
+  ['j_flag','accounts.churn_flag = true',110,'22,0% · classificação registrada'],
+  ['j_event','≥1 churn_event',352,'70,4% · evento registrado'],
+  ['j_paid_end','≥1 linha paga encerrada',288,'57,6% · não equivale a perda'],
+  ['j_d90_23','Evento ≤90d · coorte 2023',44,'19,4% de 227 elegíveis'],
+  ['j_d90_24','Evento ≤90d · coorte 2024',92,'47,2% de 195 elegíveis']
+];
 function renderJourney(){
-  document.getElementById('journey').innerHTML = JOURNEY.map((j,i)=>(i>0?'<div class="j-arrow">→</div>':'')+'<div class="j-step" data-step="'+j[0]+'"><div class="n">Etapa '+(i+1)+'</div><div class="val">'+j[2]+'</div><div class="lbl">'+j[1]+'</div><div class="pct">'+j[3]+'</div></div>').join('');
-  document.querySelectorAll('#journey .j-step').forEach(el=>el.addEventListener('click', ()=>{
-    const step = el.dataset.step;
-    if(['j_exit','j_react','j_churn_now'].includes(step)) openJourneyAccounts(step); else openExplain(step);
-  }));
+  document.getElementById('journey').innerHTML = JOURNEY.map((j,i)=>(i>0?'<div class="j-arrow">·</div>':'')+'<div class="j-step"><div class="n">Indicador '+(i+1)+'</div><div class="val">'+j[2]+'</div><div class="lbl">'+j[1]+'</div><div class="pct">'+j[3]+'</div></div>').join('');
 }
 
 let segDim = 'industry';
@@ -442,12 +441,12 @@ function renderSegTabs(){
 function renderSegments(base){
   const col = SEG_COLS[segDim];
   const groups = {};
-  base.forEach(a=>{ const k=a[col]; if(!groups[k]) groups[k]={n:0,churn:0,mrr:0,mrrRisk:0}; groups[k].n++; groups[k].mrr+=a[6]; if(a[7]===1){groups[k].churn++; groups[k].mrrRisk+=a[6];} });
-  const rows = Object.keys(groups).map(k=>({k, ...groups[k], rate: groups[k].n? groups[k].churn/groups[k].n*100:0, share: groups[k].mrr? groups[k].mrrRisk/groups[k].mrr*100:0}));
+  base.forEach(a=>{ const k=a[col]; if(!groups[k]) groups[k]={n:0,flag:0}; groups[k].n++; if(a[7]===1) groups[k].flag++; });
+  const rows = Object.keys(groups).map(k=>({k, n:groups[k].n, flag:groups[k].flag, rate:groups[k].n?groups[k].flag/groups[k].n*100:0}));
   rows.sort((a,b)=>b.rate-a.rate);
   const maxRate = Math.max(...rows.map(r=>r.rate),1);
-  let html = '<div class="seg-row head"><div>'+SEG_TITLE[segDim]+'</div><div>Taxa de churn</div><div>Contas</div><div>MRR em risco</div></div>';
-  html += rows.map(r=>'<div class="seg-row" data-key="'+r.k+'"><div>'+r.k+'</div><div class="bar-track" style="max-width:200px;"><div class="bar-fill" style="width:'+(r.rate/maxRate*100)+'%;background:var(--risk)"></div></div><div class="num">'+r.n+'</div><div class="risk-badge">'+fmtPct(r.share)+'</div></div>').join('');
+  let html = '<div class="seg-row head"><div>'+SEG_TITLE[segDim]+'</div><div>account flag=true</div><div>Contas</div><div>Leitura</div></div>';
+  html += rows.map(r=>'<div class="seg-row" data-key="'+r.k+'"><div>'+r.k+'</div><div class="bar-track" style="max-width:200px;"><div class="bar-fill" style="width:'+(r.rate/maxRate*100)+'%;background:var(--risk)"></div></div><div class="num">'+r.n+'</div><div class="risk-badge">'+fmtPct(r.rate)+' · sinal</div></div>').join('');
   document.getElementById('seg-table').innerHTML = html;
   document.querySelectorAll('#seg-table .seg-row:not(.head)').forEach(el=>el.addEventListener('click', ()=>openSegAccounts(segDim, el.dataset.key, SEG_TITLE[segDim]+': '+el.dataset.key)));
 }
@@ -470,25 +469,18 @@ const ACTIONS = [
 function renderActions(){ document.getElementById('actions-list').innerHTML = ACTIONS.map((a,i)=>'<div class="action"><div class="num">'+(i+1)+'</div><div><h4>'+a.h+'</h4><p>'+a.d+'</p></div><div class="impact">'+a.imp+'</div></div>').join(''); }
 
 function accountStory(q){
-  const dg = q.why.includes('downgrade'), esc = q.why.includes('escalado'), low = q.why.includes('baixa');
-  let doubt = 'Não sabemos, sem falar com o time de CS, se isso já foi tratado ou ainda está aberto.';
-  if(dg) doubt = 'Não sabemos se o downgrade foi corte de orçamento ou uso real abaixo do plano — só uma conversa esclarece.';
-  else if(esc) doubt = 'Não sabemos se o ticket escalado foi resolvido a contento depois de escalar.';
-  let action = 'Marcar para revisão de CS nesta semana.';
-  if(q.score>=5) action = 'Prioridade alta: contato do CSM em até 48h, revisando os sinais abaixo antes de ligar.';
-  else if(dg) action = 'CSM confirmar o motivo do downgrade diretamente com o cliente.';
-  return '<div class="story-block"><div class="sk">O que aconteceu</div><p style="margin:4px 0 0;">'+q.why+'. MRR atual: '+fmtUSD(q.mrr)+'/mês. Plano '+q.plan+', canal '+q.channel+', indústria '+q.industry+'.</p></div>'+
-    '<div class="story-block"><div class="sk doubt">O que ainda não sabemos</div><p style="margin:4px 0 0;">'+doubt+'</p></div>'+
-    '<div class="story-block"><div class="sk">Próxima ação recomendada</div><p style="margin:4px 0 0;">'+action+'</p></div>';
+  return '<div class="story-block"><div class="sk">Sinais registrados</div><p style="margin:4px 0 0;">'+q.why+'. Plano '+q.plan+', canal '+q.channel+', indústria '+q.industry+'.</p></div>'+
+    '<div class="story-block"><div class="sk doubt">Limite desta leitura</div><p style="margin:4px 0 0;">Os sinais vêm de fontes com inconsistências temporais e não representam probabilidade validada de churn.</p></div>'+
+    '<div class="story-block"><div class="sk">Próxima ação segura</div><p style="margin:4px 0 0;">Validar a sequência temporal e o estado econômico da conta antes de qualquer intervenção.</p></div>';
 }
 function openAccountDrawer(id){
   const q = QUEUE.find(x=>x.id===id); if(!q) return;
-  openModal('Briefing operacional', q.name+' · '+q.id, accountStory(q));
+  openModal('Triagem exploratória', q.name+' · '+q.id, accountStory(q));
 }
 function renderQueue(){
   const filtered = QUEUE.filter(q => (state.plan==='all'||q.plan===state.plan) && (state.ch==='all'||q.channel===state.ch));
-  document.getElementById('queue-note').textContent = '113 contas ativas (de 500) acionam ao menos 2 sinais de risco ao mesmo tempo, somando ~$314.807/mês em MRR. Mostrando '+filtered.length+' com maior MRR, no filtro atual.';
-  document.getElementById('queue-body').innerHTML = filtered.map(q=>'<tr class="rowbtn" data-id="'+q.id+'"><td>'+q.name+'<br><span style="color:var(--muted);font-size:11px;">'+q.id+'</span></td><td>'+q.industry+'</td><td>'+q.plan+'</td><td>'+q.channel+'</td><td class="mrr-cell">'+fmtUSD(q.mrr)+'</td><td>'+q.why+'</td></tr>').join('') || '<tr><td colspan="6" style="color:var(--muted);">Nenhuma conta neste filtro.</td></tr>';
+  document.getElementById('queue-note').textContent = 'Na exploração original, 113 contas acionaram ao menos 2 sinais simultâneos. Esta fila demonstra uma lógica de triagem; não é uma previsão validada de churn.';
+  document.getElementById('queue-body').innerHTML = filtered.map(q=>'<tr class="rowbtn" data-id="'+q.id+'"><td>'+q.name+'<br><span style="color:var(--muted);font-size:11px;">'+q.id+'</span></td><td>'+q.industry+'</td><td>'+q.plan+'</td><td>'+q.channel+'</td><td>'+q.why+'</td></tr>').join('') || '<tr><td colspan="5" style="color:var(--muted);">Nenhuma conta neste filtro.</td></tr>';
   document.querySelectorAll('#queue-body tr.rowbtn').forEach(el=>el.addEventListener('click', ()=>openAccountDrawer(el.dataset.id)));
 }
 
@@ -500,7 +492,7 @@ function renderAll(){
   if(state.year!=='all') parts.push('período: '+state.year);
   if(state.ch!=='all') parts.push('canal: '+state.ch);
   if(state.plan!=='all') parts.push('plano: '+state.plan);
-  document.getElementById('filter-note').textContent = parts.length? 'Filtro ativo — '+parts.join(' · ')+'. A Zona 2 (jornada, achados, ações) usa a base completa.' : 'Nenhum filtro ativo — mostrando as 500 contas.';
+  document.getElementById('filter-note').textContent = parts.length? 'Filtro ativo — '+parts.join(' · ')+'. A Zona 2 (sinais, achados e prioridades) usa a base completa.' : 'Nenhum filtro ativo — mostrando as 500 contas.';
 }
 
 document.getElementById('f-year').addEventListener('change', e=>{state.year=e.target.value; renderAll();});
