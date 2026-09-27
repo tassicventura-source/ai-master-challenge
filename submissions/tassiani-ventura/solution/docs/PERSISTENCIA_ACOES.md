@@ -6,11 +6,11 @@
 
 Entidades operacionais: `op_customers`, `op_subscriptions`, `op_interactions`, `op_tasks`, `op_alerts`, `op_journey_events`, `op_source_records` e `op_source_imports`. Cadastro/assinatura/tarefa inicial, interações/follow-up, alterações de assinatura/lifecycle, tarefas/alertas e eventos relacionados são gravados em transações. Eventos guardam ator informado, origem, horário, resumo, antes/depois e entidade relacionada. Campos históricos só entram no agregado atual quando confirmados explicitamente.
 
-A Central histórica persiste snapshot do sinal, área, conta, ação, owner, prioridade, prazo, status, observação, resultado e trilha. Para compatibilidade, SQLite usa `retention_actions`/`retention_action_events`; PostgreSQL usa `op_retention_actions`/`op_retention_action_events`. O mesmo registro aparece no Meu Trabalho por responsável, Gestão e Conta 360 da conta correspondente. Resultado é informação declarada pelo operador; não é reconciliação automática de outcome econômico.
+A Central histórica persiste snapshot do sinal, área, conta, ação, owner, prioridade, prazo, status, observação, resultado e trilha. Para compatibilidade, SQLite usa `retention_actions`/`retention_action_events`; PostgreSQL usa `op_retention_actions`/`op_retention_action_events`. O mesmo registro aparece em Minha fila por responsável, Gestão e Conta 360 da conta correspondente. Resultado é informação declarada pelo operador; não é reconciliação automática de outcome econômico.
 
 ### SQLite local / modo demo
 
-Sem `DATABASE_URL`, ambos os stores usam `data/retention_actions.sqlite` por padrão; `RETENTION_DB_PATH` escolhe outro arquivo local. O banco é criado no primeiro uso. Para validar persistência local, crie cliente/ação, reinicie o processo Streamlit e reabra Cliente 360 / Meu Trabalho. Os testes usam bancos temporários para isolamento.
+Sem `DATABASE_URL`, ambos os stores usam `data/retention_actions.sqlite` por padrão; `RETENTION_DB_PATH` escolhe outro arquivo local. O banco é criado no primeiro uso. Para validar persistência local, crie cliente/ação, reinicie o processo Streamlit e reabra Cliente 360 / Minha fila. Os testes usam bancos temporários para isolamento.
 
 O botão de reset da Gestão exige digitar `RESETAR DEMO` e só funciona em SQLite; recarrega as 500 contas históricas e mantém os CSVs analíticos intactos. **Não use reset em dados de trabalho.**
 
