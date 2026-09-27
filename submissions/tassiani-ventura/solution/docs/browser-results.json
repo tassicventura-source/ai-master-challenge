@@ -1,0 +1,113 @@
+{
+  "health": "ok",
+  "routes": [
+    {
+      "action": "created",
+      "owner": "QA Retenção",
+      "persisted": true
+    },
+    {
+      "route": "Central de Retenção"
+    },
+    {
+      "crm": "created lead, assigned commercial owner, recorded interaction and follow-up",
+      "persisted": true
+    },
+    {
+      "crm": "lead activities visible in Conta 360",
+      "connected": true
+    },
+    {
+      "route": "CRM e operação comercial"
+    },
+    {
+      "route": "Visão executiva"
+    },
+    {
+      "route": "Conta 360",
+      "csv": "jornada_A-2e4581.csv",
+      "bytes": 1425
+    },
+    {
+      "route": "Growth e Comercial",
+      "csv": "growth_por_origem.csv",
+      "bytes": 605
+    },
+    {
+      "route": "Produto",
+      "csv": "produto_contas.csv",
+      "bytes": 14660
+    },
+    {
+      "route": "Suporte e CS",
+      "csv": "suporte_prioridades.csv",
+      "bytes": 427
+    },
+    {
+      "route": "Finance e RevOps",
+      "csv": "finance_eventos.csv",
+      "bytes": 48410
+    },
+    {
+      "route": "Jornada e áreas"
+    },
+    {
+      "route": "Dados e arquitetura"
+    },
+    {
+      "drilldown": "Finance → Conta 360",
+      "ok": true
+    },
+    {
+      "action": "created-mobile",
+      "owner": "QA Mobile",
+      "persisted": true
+    },
+    {
+      "mobileWidth": 390,
+      "documentWidth": 390,
+      "clientWidth": 390
+    },
+    {
+      "mobile": "Central de Retenção",
+      "documentWidth": 390
+    },
+    {
+      "mobile": "CRM e operação comercial",
+      "documentWidth": 390
+    },
+    {
+      "mobile": "Visão executiva",
+      "documentWidth": 390
+    },
+    {
+      "mobile": "Conta 360",
+      "documentWidth": 390
+    },
+    {
+      "mobile": "Growth e Comercial",
+      "documentWidth": 390
+    },
+    {
+      "mobile": "Produto",
+      "documentWidth": 390
+    },
+    {
+      "mobile": "Suporte e CS",
+      "documentWidth": 390
+    },
+    {
+      "mobile": "Finance e RevOps",
+      "documentWidth": 390
+    },
+    {
+      "mobile": "Jornada e áreas",
+      "documentWidth": 390
+    },
+    {
+      "mobile": "Dados e arquitetura",
+      "documentWidth": 390
+    }
+  ],
+  "pageErrors": []
+}

@@ -1,0 +1,65 @@
+from __future__ import annotations
+
+SCHEMA_CHANGES = [
+    # accounts
+    {"base_atual":"accounts","campo_atual":"account_id","acao":"manter","base_nova":"accounts","campo_novo":"account_id","motivo":"Chave da conta."},
+    {"base_atual":"accounts","campo_atual":"account_name","acao":"manter","base_nova":"accounts","campo_novo":"account_name","motivo":"Identificação da conta."},
+    {"base_atual":"accounts","campo_atual":"industry","acao":"manter","base_nova":"accounts","campo_novo":"industry","motivo":"Segmentação estática confiável."},
+    {"base_atual":"accounts","campo_atual":"country","acao":"manter","base_nova":"accounts","campo_novo":"country","motivo":"Segmentação estática confiável."},
+    {"base_atual":"accounts","campo_atual":"signup_date","acao":"manter","base_nova":"accounts","campo_novo":"signup_date","motivo":"Marco de entrada da conta."},
+    {"base_atual":"accounts","campo_atual":"referral_source","acao":"manter","base_nova":"accounts","campo_novo":"referral_source","motivo":"Origem macro de aquisição."},
+    {"base_atual":"accounts","campo_atual":"plan_tier","acao":"retirar_do_canonico","base_nova":"accounts","campo_novo":"—","motivo":"Não é demonstrado como plano inicial ou atual; permanece no raw para auditoria."},
+    {"base_atual":"accounts","campo_atual":"seats","acao":"retirar_do_canonico","base_nova":"accounts","campo_novo":"—","motivo":"Sem posição temporal confiável; seats contratuais ficam em subscriptions."},
+    {"base_atual":"accounts","campo_atual":"is_trial","acao":"retirar_do_canonico","base_nova":"accounts","campo_novo":"—","motivo":"Estado temporal não demonstrado; trial permanece por subscription."},
+    {"base_atual":"accounts","campo_atual":"churn_flag","acao":"retirar_do_canonico","base_nova":"accounts","campo_novo":"—","motivo":"Conflita com outras representações de churn; não deve ser verdade da conta."},
+    {"base_atual":"accounts","campo_atual":"—","acao":"adicionar","base_nova":"accounts","campo_novo":"referral_detail","motivo":"Permite identificar campanha/conteúdo/parceiro específico."},
+    {"base_atual":"accounts","campo_atual":"—","acao":"adicionar","base_nova":"accounts","campo_novo":"icp_segment","motivo":"Segmento operacional usado por Growth, Sales e CS."},
+    {"base_atual":"accounts","campo_atual":"—","acao":"adicionar","base_nova":"accounts","campo_novo":"owner_id","motivo":"Responsável atual pela conta."},
+    {"base_atual":"accounts","campo_atual":"—","acao":"adicionar","base_nova":"accounts","campo_novo":"journey_stage","motivo":"Estágio atual da jornada, preenchido no sistema de origem."},
+    # subscriptions
+    {"base_atual":"subscriptions","campo_atual":"subscription_id/account_id/datas/plano/seats/MRR/ARR/trial/billing/auto_renew","acao":"manter","base_nova":"subscriptions","campo_novo":"mesmos campos","motivo":"Verdade no grão da linha de subscription."},
+    {"base_atual":"subscriptions","campo_atual":"upgrade_flag","acao":"retirar_do_canonico","base_nova":"subscriptions","campo_novo":"movement_type + movement_effective_date","motivo":"Flag sem timestamp não reconstrói a mudança."},
+    {"base_atual":"subscriptions","campo_atual":"downgrade_flag","acao":"retirar_do_canonico","base_nova":"subscriptions","campo_novo":"movement_type + movement_effective_date","motivo":"Flag sem timestamp não reconstrói a mudança."},
+    {"base_atual":"subscriptions","campo_atual":"churn_flag","acao":"retirar_do_canonico","base_nova":"subscriptions","campo_novo":"record_state","motivo":"Na base atual equivale a linha encerrada, não churn da conta."},
+    {"base_atual":"subscriptions","campo_atual":"—","acao":"adicionar","base_nova":"subscriptions","campo_novo":"contract_id","motivo":"Permite distinguir contratos/renovações paralelas."},
+    # usage
+    {"base_atual":"feature_usage","campo_atual":"usage_id","acao":"corrigir","base_nova":"feature_usage","campo_novo":"usage_event_id + source_usage_id","motivo":"Há IDs conflitantes; cria chave canônica sem apagar a origem."},
+    {"base_atual":"feature_usage","campo_atual":"subscription_id/usage_date/feature/contagens","acao":"manter","base_nova":"feature_usage","campo_novo":"mesmos campos","motivo":"Preserva telemetria observada."},
+    {"base_atual":"feature_usage","campo_atual":"—","acao":"adicionar","base_nova":"feature_usage","campo_novo":"account_id","motivo":"Evita joins repetidos para perguntas no grão conta."},
+    {"base_atual":"feature_usage","campo_atual":"—","acao":"adicionar","base_nova":"feature_usage","campo_novo":"user_id/action_name/event_success/context","motivo":"Permite interpretar adoção, sucesso e fricção; histórico atual fica vazio."},
+    {"base_atual":"feature_usage","campo_atual":"—","acao":"adicionar_derivado","base_nova":"feature_usage","campo_novo":"temporal_status","motivo":"Explicita eventos antes/dentro/depois da janela da subscription."},
+    # support -> interactions
+    {"base_atual":"support_tickets","campo_atual":"todas as métricas atuais","acao":"preservar_e_ampliar","base_nova":"customer_interactions","campo_novo":"campos de atendimento preservados","motivo":"O histórico de suporte continua utilizável no grão ticket."},
+    {"base_atual":"support_tickets","campo_atual":"—","acao":"adicionar","base_nova":"customer_interactions","campo_novo":"area/interaction_type/owner_id/channel","motivo":"Distingue Comercial, CS, Suporte e Onboarding dentro de uma estrutura comum."},
+    {"base_atual":"support_tickets","campo_atual":"—","acao":"adicionar","base_nova":"customer_interactions","campo_novo":"topic/feature/problem_type/impact/root_cause/recurrence","motivo":"Transforma atendimento em inteligência para Produto e CS."},
+    {"base_atual":"support_tickets","campo_atual":"—","acao":"adicionar","base_nova":"customer_interactions","campo_novo":"outcome/next_action/next_action_due_at","motivo":"Liga interação a ação e resultado."},
+    # churn -> lifecycle
+    {"base_atual":"churn_events","campo_atual":"churn_event_id/account_id/date/reason/refund/feedback","acao":"preservar_como_registro","base_nova":"lifecycle_events","campo_novo":"event_id + campos registrados","motivo":"Mantém a evidência histórica sem chamá-la automaticamente de perda."},
+    {"base_atual":"churn_events","campo_atual":"preceding_upgrade_flag/preceding_downgrade_flag","acao":"retirar_do_canonico","base_nova":"lifecycle_events","campo_novo":"—","motivo":"Flags não verificáveis temporalmente; raw preservado para auditoria."},
+    {"base_atual":"churn_events","campo_atual":"is_reactivation","acao":"preservar_como_rotulo","base_nova":"lifecycle_events","campo_novo":"recorded_event_type","motivo":"O rótulo é mantido, mas não vira evento canônico sem reconciliação."},
+    {"base_atual":"churn_events","campo_atual":"—","acao":"adicionar","base_nova":"lifecycle_events","campo_novo":"canonical_event_type","motivo":"Venda, ativação, expansão, contração, renovação, cancelamento, logo churn ou reativação."},
+    {"base_atual":"churn_events","campo_atual":"—","acao":"adicionar","base_nova":"lifecycle_events","campo_novo":"mrr_before/mrr_after/seats_before/seats_after/plan_before/plan_after","motivo":"Conecta evento ao resultado econômico."},
+]
+
+NEW_FIELDS = [
+    {"area":"Growth/CRM","base":"accounts","field":"referral_detail","required":"Sim","purpose":"Saber qual campanha, conteúdo, evento ou parceiro originou a conta."},
+    {"area":"Growth/Sales/CS","base":"accounts","field":"icp_segment","required":"Sim","purpose":"Usar a mesma segmentação operacional entre áreas."},
+    {"area":"Sales/CS","base":"accounts","field":"owner_id","required":"Sim","purpose":"Definir dono atual da conta."},
+    {"area":"Sales/CS","base":"accounts","field":"journey_stage","required":"Sim","purpose":"Identificar estágio atual da jornada."},
+    {"area":"Billing/RevOps","base":"subscriptions","field":"contract_id","required":"Sim","purpose":"Distinguir contrato, renovação e linhas paralelas."},
+    {"area":"Billing/RevOps","base":"subscriptions","field":"movement_type","required":"Quando houver mudança","purpose":"Classificar expansão, contração, renovação, troca etc."},
+    {"area":"Billing/RevOps","base":"subscriptions","field":"movement_effective_date","required":"Quando houver mudança","purpose":"Dar timestamp ao movimento comercial."},
+    {"area":"Produto","base":"feature_usage","field":"user_id","required":"Recomendado","purpose":"Separar adoção de um usuário de adoção da conta."},
+    {"area":"Produto","base":"feature_usage","field":"action_name","required":"Recomendado","purpose":"Entender qual ação dentro da feature foi realizada."},
+    {"area":"Produto","base":"feature_usage","field":"event_success","required":"Recomendado","purpose":"Distinguir uso bem-sucedido de tentativa/erro."},
+    {"area":"Sales/CS/Suporte","base":"customer_interactions","field":"area","required":"Sim","purpose":"Eliminar sobreposição entre Comercial, CS, Suporte e Onboarding."},
+    {"area":"Sales/CS/Suporte","base":"customer_interactions","field":"interaction_type","required":"Sim","purpose":"Explicar o motivo operacional da interação."},
+    {"area":"CS/Suporte","base":"customer_interactions","field":"topic","required":"Sim","purpose":"Agrupar temas recorrentes."},
+    {"area":"CS/Suporte/Produto","base":"customer_interactions","field":"feature_name","required":"Quando aplicável","purpose":"Ligar fricção à parte do produto."},
+    {"area":"CS/Suporte","base":"customer_interactions","field":"impact_level","required":"Quando houver problema","purpose":"Separar dúvida, dificuldade, bloqueio parcial ou total."},
+    {"area":"Suporte/Produto","base":"customer_interactions","field":"root_cause","required":"Após diagnóstico","purpose":"Converter tickets em melhoria operacional ou de produto."},
+    {"area":"Sales/CS/Suporte","base":"customer_interactions","field":"outcome","required":"Sim","purpose":"Registrar o resultado da interação."},
+    {"area":"Sales/CS","base":"customer_interactions","field":"next_action / next_action_due_at","required":"Quando houver follow-up","purpose":"Transformar sinal em ação com dono e prazo."},
+    {"area":"Finance/RevOps","base":"lifecycle_events","field":"canonical_event_type","required":"Sim","purpose":"Separar expansão, contração, renovação, cancelamento, churn e reativação."},
+    {"area":"Finance/RevOps","base":"lifecycle_events","field":"mrr_before / mrr_after","required":"Sim","purpose":"Medir impacto econômico real do evento."},
+]
