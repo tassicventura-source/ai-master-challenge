@@ -1,3 +1,10 @@
+from pathlib import Path
+import sys
+
+APP_ROOT = Path(__file__).resolve().parent
+if str(APP_ROOT) not in sys.path:
+    sys.path.insert(0, str(APP_ROOT))
+
 import streamlit as st
 from src.ui import CSS
 from src.data_access import ensure_database
