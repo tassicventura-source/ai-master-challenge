@@ -61,14 +61,15 @@ O disco do Streamlit Community Cloud pode ser efêmero e não deve ser tratado c
 
 ## GitHub e Streamlit Community Cloud
 
-O repositório deve conter `app.py` na raiz, mais `requirements.txt`, `src/`, `pages/`, `.streamlit/`, `assets/` e `data/`. Inclua os cinco CSVs em `data/raw/` para que o banco analítico possa ser reconstruído.
+Esta submissão fica dentro de um repositório com vários desafios. Não mova os arquivos para o topo nem selecione o `app.py` de outro desafio. O caminho desta aplicação no GitHub é `submissions/tassiani-ventura/solution/app.py`; `requirements.txt`, `src/`, `pages/`, e os cinco arquivos de `data/raw/` estão ao lado dele. O app calcula paths a partir da própria pasta e foi verificado iniciando-o desde a raiz do repositório.
 
-1. Crie um repositório GitHub e envie o conteúdo deste diretório, sem a pasta externa do projeto.
-2. No Streamlit Community Cloud, selecione o repositório/branch e `app.py`; configure Python 3.12.
-3. Não trate o deploy público simples como backend de tarefas em produção: escolha PostgreSQL gerenciado antes de armazenar trabalho operacional real.
-4. Teste Central, quatro filas, Conta 360, drill-downs e exportações.
+1. Conecte o fork `tassicventura-source/ai-master-challenge` ao [Streamlit Community Cloud](https://share.streamlit.io/).
+2. Clique **Create app** e escolha branch **`submission/tassiani-ventura`** e arquivo **`submissions/tassiani-ventura/solution/app.py`**. Se os menus não oferecerem a subpasta, informe esse caminho relativo manualmente.
+3. Em **Advanced settings**, selecione **Python 3.12**. As dependências vêm de `submissions/tassiani-ventura/solution/requirements.txt`; não crie outro `requirements.txt` na raiz do repositório.
+4. Clique **Deploy**. Ao terminar, teste Central, quatro filas, Conta 360, drill-downs e exportações. Commits novos nessa branch acionam atualização do app.
+5. Alternativamente, para publicar esta pasta como um repositório separado, copie **o conteúdo** de `solution/` para a raiz daquele repositório e selecione `app.py` na raiz.
 
-O projeto inclui workflow GitHub Actions. Nenhum repositório remoto ou deploy foi criado/publicado neste pacote.
+Para esta entrega, um workflow dentro de uma subpasta não seria detectado pelo GitHub Actions; validações reproduzíveis ficam em `docs/VALIDACAO.md`. O modo demo usa dados sintéticos. O arquivo SQLite de ações não é incluído no Git e o armazenamento local do Community Cloud é efêmero: não use o app hospedado para guardar ações importantes ou dados reais sem migrar para uma base persistente.
 
 ## Validar
 
