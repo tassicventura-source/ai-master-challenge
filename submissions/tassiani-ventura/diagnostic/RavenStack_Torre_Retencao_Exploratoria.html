@@ -367,42 +367,40 @@ document.getElementById('modal-close').addEventListener('click', ()=>document.ge
 document.getElementById('modal-backdrop').addEventListener('click', (ev)=>{ if(ev.target.id==='modal-backdrop') document.getElementById('modal-backdrop').classList.add('hidden'); });
 
 function renderHeadline(base, events){
-  const churned = base.filter(a=>a[7]===1);
-  const mrrRisk = churned.reduce((s,a)=>s+a[6],0);
-  document.getElementById('headline').innerHTML = 'Em uma frase: <b>'+fmtPct(base.length?churned.length/base.length*100:0)+'</b> da base já é churn confirmado (<b>'+fmtUSD(mrrRisk)+'/mês</b> em MRR), e o maior risco concentrado — em dinheiro, não só em volume — está no motivo <b>Support</b>, no canal <b>Event</b> e na indústria <b>DevTools</b>.';
+  const flagged = base.filter(a=>a[7]===1);
+  const touched = new Set(events.map(e=>e[0])).size;
+  document.getElementById('headline').innerHTML = 'No filtro atual há <b>'+base.length+'</b> conta(s), <b>'+flagged.length+'</b> com <code>accounts.churn_flag=true</code> e <b>'+events.length+'</b> <code>churn_event</code>(s) em <b>'+touched+'</b> conta(s). <b>Esses sinais não equivalem, sozinhos, a perda econômica confirmada.</b>';
 }
 function renderBrief(base, events){
-  const churnedN = base.filter(a=>a[7]===1).length;
-  const churnPct = base.length? churnedN/base.length*100 : 0;
-  const mrrRisk = base.filter(a=>a[7]===1).reduce((s,a)=>s+a[6],0);
-  const mrrTotal = base.reduce((s,a)=>s+a[6],0);
-  const ev23 = CHU.filter(e=>e[1].slice(0,4)==='2023').length, ev24 = CHU.filter(e=>e[1].slice(0,4)==='2024').length;
+  const flaggedN = base.filter(a=>a[7]===1).length;
+  const flaggedPct = base.length ? flaggedN/base.length*100 : 0;
+  const touched = new Set(events.map(e=>e[0])).size;
+  const refund = events.reduce((sum,e)=>sum+e[4],0);
+  const refundEvents = events.filter(e=>e[4]>0).length;
   const rows = [
-    ['O que aconteceu', 'Eventos de saída passaram de <b>'+ev23+'</b> (2023) para <b>'+ev24+'</b> (2024). No filtro atual: <b>'+events.length+'</b> evento(s) e <b>'+churnedN+'</b> conta(s) confirmadas como churn (<b>'+fmtPct(churnPct)+'</b> da base filtrada).'],
-    ['Quanto representa', '<b>'+fmtUSD(mrrRisk)+'/mês</b> em MRR está com contas churned, sobre uma base de <b>'+fmtUSD(mrrTotal)+'/mês</b> no filtro atual.'],
-    ['Por que importa', 'Support pesa mais em dinheiro (21,7% do MRR perdido) do que em eventos (17,3%) — atinge contas maiores. Event e DevTools concentram a maior taxa de churn e a maior fatia de MRR em risco.'],
-    ['O que provavelmente explica', 'Features, Budget e Support são os motivos mais citados, quase empatados. O uso por conta vem encolhendo mesmo com a base crescendo, e quem fez upgrade recente sai 2,3× mais do que quem fez downgrade.'],
-    ['O que ainda não sabemos', 'Se o motivo declarado é causa real ou só a explicação mais fácil de dar. Por que churn_flag (22,0%) e os eventos registrados (70,4% já teve algum) não se reconciliam totalmente. Não há efeito causal comprovado de canal, plano, produto ou suporte.'],
-    ['O que fazer', 'Rever a qualificação de leads do canal Event, criar check-in pós-upgrade em D+30/D+60, e investigar por que a nota de satisfação não capta o problema de Support — ver "O que fazer" abaixo.']
+    ['O que aparece no filtro', '<b>'+base.length+'</b> conta(s); <b>'+flaggedN+'</b> com account flag=true (<b>'+fmtPct(flaggedPct)+'</b>); <b>'+events.length+'</b> churn_event(s) em <b>'+touched+'</b> conta(s).'],
+    ['Ajustes registrados', '<b>'+fmtUSD(refund)+'</b> em refund/crédito, distribuídos em <b>'+refundEvents+'</b> evento(s). Esse valor não é tratado como receita perdida.'],
+    ['Por que importa', 'As representações de churn entram em conflito. No conjunto completo, 400 de 500 contas discordam entre account flag, presença de churn_event e encerramento de linha paga.'],
+    ['O que a investigação mostrou', 'O aumento de eventos precoces em 2024 é real, mas não pode ser convertido na mesma proporção em clientes ou receita perdidos. A janela temporal também altera a leitura.'],
+    ['O que ainda não sabemos', 'Logo churn real, revenue churn, GRR/NRR e causa comercial das perdas permanecem não identificáveis sem reconciliar contrato, cobrança, pagamento e MRR antes/depois.'],
+    ['Próxima decisão', 'Fechar o desfecho econômico das 92 contas de 2024 por trás dos 47,2%, comparar as 22 jornadas Organic × Enterprise e criar uma verdade operacional única por conta.']
   ];
   document.getElementById('brief-body').innerHTML = rows.map(r=>'<div class="brief-row"><div class="k">'+r[0]+'</div><div class="v">'+r[1]+'</div></div>').join('');
 }
 function renderKPIs(base, events){
-  const churned = base.filter(a=>a[7]===1);
-  const mrrRisk = churned.reduce((s,a)=>s+a[6],0);
-  const mrrTotal = base.reduce((s,a)=>s+a[6],0);
-  const refund = events.reduce((s,e)=>s+e[4],0);
-  const accTouched = new Set(events.map(e=>e[0])).size;
+  const flagged = base.filter(a=>a[7]===1);
+  const refund = events.reduce((sum,e)=>sum+e[4],0);
+  const touched = new Set(events.map(e=>e[0])).size;
+  const refundEvents = events.filter(e=>e[4]>0).length;
   const cards = [
-    ['kpi_base','Contas na base', base.length, 'com o filtro atual'],
-    ['kpi_churn','Churn confirmado hoje', fmtPct(base.length?churned.length/base.length*100:0), churned.length+' de '+base.length+' contas'],
-    ['kpi_events','Eventos de saída no período', events.length, accTouched+' conta(s) distintas'],
-    ['kpi_mrr_risk','MRR em risco', fmtUSD(mrrRisk), fmtPct(mrrTotal?mrrRisk/mrrTotal*100:0)+' do MRR da base'],
-    ['kpi_mrr_total','MRR total da base', fmtUSD(mrrTotal), base.length+' conta(s)'],
-    ['kpi_refund','Reembolsos no período', fmtUSD(refund), events.length? Math.round(events.filter(e=>e[4]>0).length/events.length*100)+'% dos eventos':'—']
+    ['kpi_base','Contas no filtro', base.length, 'recorte atual'],
+    ['kpi_churn','Account flag = true', fmtPct(base.length?flagged.length/base.length*100:0), flagged.length+' de '+base.length+' contas'],
+    ['kpi_events','Churn events registrados', events.length, 'no período/filtro'],
+    ['kpi_mrr_risk','Contas com evento', touched, 'contas distintas'],
+    ['kpi_mrr_total','Refund/crédito registrado', fmtUSD(refund), 'campo registrado; não receita perdida'],
+    ['kpi_refund','Eventos com refund/crédito', refundEvents, events.length? Math.round(refundEvents/events.length*100)+'% dos eventos':'—']
   ];
   document.getElementById('kpi-grid').innerHTML = cards.map(c=>'<div class="kpi" data-explain="'+c[0]+'"><div class="lbl">'+c[1]+' <span class="info-dot">?</span></div><div class="val">'+c[2]+'</div><div class="sub">'+c[3]+'</div></div>').join('');
-  document.querySelectorAll('#kpi-grid .kpi').forEach(el=>el.addEventListener('click', ()=>openExplain(el.dataset.explain)));
 }
 let reasonMetric = 'events';
 function renderReasons(events){
