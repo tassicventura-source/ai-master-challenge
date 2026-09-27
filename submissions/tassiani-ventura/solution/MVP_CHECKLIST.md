@@ -1,3 +1,5 @@
+> **Checkpoint histórico.** Esta checklist registra uma etapa intermediária do desenvolvimento. O estado final validado da entrega está em [`docs/VALIDACAO.md`](docs/VALIDACAO.md), que substitui os checkpoints e pendências abaixo.
+
 # MVP_CHECKLIST — RavenStack Customer Journey
 
 **Última revisão:** 2026-09-27 08:10, São Paulo. **Atenção:** core funcional e suíte Python aprovados; E2E browser ainda NÃO aprovado. Status reflete a evidência disponível, não apenas a presença de código.
