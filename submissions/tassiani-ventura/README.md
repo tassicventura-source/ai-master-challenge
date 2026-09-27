@@ -140,7 +140,7 @@ Meu papel foi principalmente **questionar o enquadramento**, decidir quais pergu
 
 ### Iterações
 
-Ao final, fiz uma auditoria dos chats e identifiquei **45 ciclos relevantes**: aproximadamente **21 ligados à investigação e análise dos dados, 12 à construção dos relatórios e 12 ao produto, sistema e implementação**.
+Ao final, fiz uma auditoria dos chats e identifiquei **53 ciclos relevantes**: aproximadamente **23 ligados à investigação e análise dos dados, 12 à construção dos relatórios e 18 ao produto, sistema e implementação**.
 
 ---
 
