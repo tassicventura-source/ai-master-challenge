@@ -22,7 +22,7 @@ python -m pip install -r requirements.txt
 python -m streamlit run app.py
 ```
 
-O app constrói/valida as saídas analíticas e cria o store operacional na primeira execução. A tela inicial é **Meu trabalho**. A primeira utilização importa, de forma idempotente, os 500 clientes históricos como `legacy / not_validated`, sem promover churn, assinatura, seats ou MRR antigos a estado atual.
+O app constrói/valida as saídas analíticas e cria o store operacional na primeira execução. A tela inicial é **Minha fila**. A primeira utilização importa, de forma idempotente, os 500 clientes históricos como `legacy / not_validated`, sem promover churn, assinatura, seats ou MRR antigos a estado atual.
 
 Para reconstruir explicitamente os dados analíticos e rodar a suíte:
 
@@ -39,7 +39,7 @@ npm run test:browser
 
 ## Fluxo operacional
 
-- **Meu trabalho:** tarefas de hoje, vencidas, próximas, renovações confirmadas, alertas e ações históricas atribuídas a quem está operando.
+- **Minha fila:** tarefas de hoje, vencidas, próximas, renovações confirmadas, alertas e ações históricas atribuídas a quem está operando.
 - **Clientes:** pesquisa/filtros por lifecycle, responsável, origem e qualidade; cadastro nativo cria cliente, owner, assinatura inicial, eventos e tarefa na mesma transação.
 - **Cliente 360:** resumo/próxima ação, interações, jornada com antes/depois e autoria, subscriptions, prévia de movimentos econômicos, tarefas/alertas, ações ligadas a sinais e evidências/fonte histórica.
 - **Tarefas & alertas:** criar/atualizar/concluir tarefas; ver alertas abertos/tratados/resolvidos sem apagar o histórico.
