@@ -140,7 +140,7 @@ Meu papel foi principalmente **questionar o enquadramento**, decidir quais pergu
 
 ### Iterações
 
-A documentação registra **5 iterações analíticas formalmente numeradas — Análises 001 a 005** — antes da consolidação do diagnóstico. Depois delas, houve ciclos adicionais de revisão do relatório, desenho da solução, construção e reconstrução do MVP, revisão de UX, validação, documentação e publicação. Como nem cada prompt ou ajuste operacional foi numerado como uma nova iteração, não atribuí um total artificial de prompts; a cronologia completa está preservada no Process Log.
+Eu não contabilizei cada ida e volta com a IA como uma iteração separada, então não seria correto apresentar um número exato de prompts ou trocas. A unidade auditável no Process Log é outra: ele registra **16 marcos/ciclos principais de trabalho**, dos quais **5 são análises formalmente numeradas (001 a 005)** e **11 são ciclos adicionais** de estruturação, revisão do diagnóstico, desenho da solução, construção/reconstrução do MVP, UX, validação, documentação e fechamento da entrega. O número real de interações com IA foi maior; a cronologia completa e as evidências estão preservadas no Process Log.
 
 ---
 
@@ -166,4 +166,4 @@ A documentação registra **5 iterações analíticas formalmente numeradas — 
 
 ---
 
-_Submissão: 27/09/2026_
+_Submissão enviada em: 27/09/2026_
