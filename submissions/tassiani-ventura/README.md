@@ -10,9 +10,9 @@ https://ravenstack-customer-journey.streamlit.app/
 ### Diagnóstico
 
 - [Relatório Final](./diagnostic/RavenStack_Relatorio_Final.html) — **fonte oficial das conclusões** do Challenge.
-- [Torre de Retenção — protótipo exploratório](./diagnostic/RavenStack_Torre_Retencao_Exploratoria.html) — material interativo criado durante a fase **Customer Value & Revenue Intelligence (dados atuais)** para testar filtros, sinais, contas e formas de transformar a investigação em ação.
+- [Customer Value & Revenue Intelligence](./diagnostic/Customer%20Value%20%26%20Revenue%20Intelligence.html) — protótipo estratégico que transforma o diagnóstico em uma proposta operacional de **Revenue Truth + Customer Value Journey + Action Layer**.
 
-> A Torre é um protótipo exploratório, não o sistema final nem um modelo validado de churn. Em caso de diferença de interpretação, prevalece o Relatório Final.
+> O Customer Value & Revenue Intelligence complementa o relatório; não cria uma definição alternativa de churn. Em caso de diferença de interpretação, prevalece o Relatório Final.
 
 ### Aplicação
 
