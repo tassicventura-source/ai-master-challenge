@@ -1,4 +1,4 @@
-# Diagnóstico e protótipo exploratório
+# Diagnóstico e protótipo estratégico
 
 Esta pasta reúne dois materiais complementares do Challenge 001.
 
@@ -6,21 +6,20 @@ Esta pasta reúne dois materiais complementares do Challenge 001.
 
 [`RavenStack_Relatorio_Final.html`](./RavenStack_Relatorio_Final.html)
 
-É a **fonte oficial das conclusões do diagnóstico**. Deve ser lido primeiro. Nele estão a interpretação final dos dados, os limites do dataset e as recomendações priorizadas.
+É a **fonte oficial das conclusões do diagnóstico**. Deve ser lido primeiro.
 
-## 2. Torre de Retenção — protótipo exploratório
+## 2. Customer Value & Revenue Intelligence
 
-[`RavenStack_Torre_Retencao_Exploratoria.html`](./RavenStack_Torre_Retencao_Exploratoria.html)
+[`Customer Value & Revenue Intelligence.html`](./Customer%20Value%20%26%20Revenue%20Intelligence.html)
 
-A Torre foi criada durante a fase documentada no Process Log como **Customer Value & Revenue Intelligence (dados atuais)**. Seu objetivo é demonstrar como a investigação poderia sair de um relatório estático e ganhar uma camada interativa para:
+Protótipo estratégico que transforma os principais achados do relatório em uma proposta de sistema operacional de investigação.
 
-- filtrar sinais por período, canal e plano;
-- localizar contas e segmentos para investigação;
-- consultar definições e limitações junto às métricas;
-- transformar achados em uma fila de análise e próximas ações.
+O material conecta três camadas:
 
-Ela é um **protótipo de exploração e triagem**, não o sistema final e não um modelo preditivo de churn. O `churn_event`, o `accounts.churn_flag` e valores de subscriptions não são tratados como perda econômica comprovada sem reconciliação.
+- **Revenue Truth** — reconciliar o desfecho econômico real por conta;
+- **Customer Value Journey** — reconstruir a jornada que levou ao desfecho;
+- **Action Layer** — definir responsável, próxima ação, prazo e evidência necessária.
 
-A aplicação atual está em [`../solution/`](../solution/) e a demo online está indicada no README principal da submissão.
+Ele **não cria uma definição alternativa de churn** e não trata `churn_event`, `accounts.churn_flag`, refund/crédito ou encerramentos de subscription como perda econômica comprovada.
 
-> Em caso de qualquer diferença de interpretação entre os materiais, prevalece o **Relatório Final**.
+> Em caso de qualquer diferença de interpretação, prevalece o **Relatório Final**.
