@@ -1,25 +1,24 @@
-# Diagnóstico e protótipo estratégico
+# Diagnóstico e materiais de decisão
 
-Esta pasta reúne dois materiais complementares do Challenge 001.
+Esta pasta reúne os materiais analíticos do Challenge 001. Todos usam as cinco bases sintéticas com corte em 31/12/2024 e distinguem evento registrado de perda econômica confirmada.
 
-## 1. Relatório Final
+## Ordem de leitura
 
-[`RavenStack_Relatorio_Final.html`](./RavenStack_Relatorio_Final.html)
+1. [RavenStack_Relatorio_Final.html](./RavenStack_Relatorio_Final.html) — **fonte oficial das conclusões executivas**.
+2. [REPRODUCAO_COMPLETA_INVESTIGACAO_ANALITICA.md](./REPRODUCAO_COMPLETA_INVESTIGACAO_ANALITICA.md) — perguntas, testes, hipóteses refutadas, cálculos e rastreabilidade.
+3. [IMPACTO_ESTIMADO_ACOES.md](./IMPACTO_ESTIMADO_ACOES.md) — plano operacional por área, prioridade e horizonte.
+4. [Customer Value & Revenue Intelligence.html](./Customer%20Value%20%26%20Revenue%20Intelligence.html) — protótipo estratégico complementar.
 
-É a **fonte oficial das conclusões do diagnóstico**. Deve ser lido primeiro.
+## Leitura correta dos dados
 
-## 2. Customer Value & Revenue Intelligence
+A revisão final confirmou que a tabela de uso não deve ser descartada apesar dos problemas de vínculo temporal. A análise foi recuperada no nível da conta/jornada, e Produto e Suporte foram retestados em janelas comparáveis. Os resultados não sustentam nenhum dos dois como explicação geral do aumento de eventos precoces, mas preservam ambos como fontes de sinais operacionais e hipóteses por conta.
 
-[`Customer Value & Revenue Intelligence.html`](./Customer%20Value%20%26%20Revenue%20Intelligence.html)
-
-Protótipo estratégico que transforma os principais achados do relatório em uma proposta de sistema operacional de investigação.
-
-O material conecta três camadas:
+O protótipo estratégico conecta:
 
 - **Revenue Truth** — reconciliar o desfecho econômico real por conta;
 - **Customer Value Journey** — reconstruir a jornada que levou ao desfecho;
 - **Action Layer** — definir responsável, próxima ação, prazo e evidência necessária.
 
-Ele **não cria uma definição alternativa de churn** e não trata `churn_event`, `accounts.churn_flag`, refund/crédito ou encerramentos de subscription como perda econômica comprovada.
+Nenhum material trata `churn_event`, `accounts.churn_flag`, refund/crédito ou encerramento de subscription como perda econômica comprovada sem reconciliação.
 
-> Em caso de qualquer diferença de interpretação, prevalece o **Relatório Final**.
+> Em caso de diferença de interpretação, prevalece o **Relatório Final**, apoiado pela reprodução analítica.
