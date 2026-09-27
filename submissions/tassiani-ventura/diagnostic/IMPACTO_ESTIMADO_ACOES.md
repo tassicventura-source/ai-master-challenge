@@ -11,8 +11,9 @@ O plano deve acontecer em **três prioridades**, mas isso **não significa três
 | **Growth** | 1. Abrir “Organic” em origens específicas. 2. Reconstruir a origem das contas Organic de 2024. 3. Passar a registrar origem detalhada em toda nova oportunidade. |
 | **Comercial** | 1. Investigar as 22 contas Organic × Enterprise junto com CS. 2. Implantar registro mínimo de necessidade, expectativa, escopo e contexto da venda. 3. Tornar obrigatório o handoff Comercial → CS. |
 | **CS** | 1. Comparar a jornada das 14 Organic × Enterprise com evento com as 8 sem evento. 2. Passar a registrar objetivo, primeiro valor, bloqueios e próximo passo das novas contas. |
-| **Suporte** | 1. Investigar por que 1.077 tickets aparecem antes do signup. 2. Classificar novos tickets por etapa da jornada e motivo. 3. Registrar solução, pendência, área acionada e próximo passo. |
+| **Suporte** | 1. Validar com a operação o significado dos 1.077 tickets anteriores ao signup, sem classificá-los previamente como pré-venda. 2. Classificar novos tickets por etapa da jornada e motivo. 3. Registrar solução, pendência, área acionada e próximo passo. |
 | **Financeiro / RevOps** | 1. Começar a classificação das 92 contas com evento precoce. 2. Separar refund, crédito e perda financeira efetiva. 3. Registrar valor antes/depois de todo novo movimento econômico relevante. |
+| **Produto + Dados** | 1. Corrigir o vínculo temporal entre conta, assinatura e uso. 2. Preservar nos novos registros a relação conta → assinatura → funcionalidade/uso → data. 3. Usar adoção, erros e evolução de uso como sinais operacionais, sem tratá-los como causa de churn sem validação. |
 | **Dados** | 1. Definir os conceitos mínimos de cliente ativo, churn, expansão, contração, reativação e refund. 2. Preservar as relações corretas entre conta, assinatura, evento e período nos novos registros. |
 | **Gestão** | 1. Nomear responsáveis. 2. Fazer acompanhamento semanal curto. 3. Cobrar aprendizado e decisão, e não apenas execução de tarefas. |
 
@@ -172,7 +173,7 @@ Os dados atuais fornecem pistas, mas não informação suficiente para afirmar o
 
 ---
 
-## 4. Suporte — aqui existe uma oportunidade maior do que parecia
+## 4. Suporte — transformar um dado ambíguo em inteligência de jornada
 
 ### O que os 2.000 tickets realmente mostram
 
@@ -184,90 +185,66 @@ A distribuição temporal é incomum:
 | Entre signup e primeira assinatura paga | **113** |
 | Depois do início pago | **810** |
 
-Portanto, **1.190 dos 2.000 tickets aparecem antes da primeira relação paga**.
+Portanto, **1.190 dos 2.000 tickets aparecem antes da primeira relação paga**. Os 1.077 anteriores ao próprio signup pertencem a **389 contas diferentes**.
 
-Mais importante: os 1.077 anteriores ao próprio signup pertencem a **389 contas diferentes**.
+Isso não autoriza chamar esses registros de pré-venda. Pode haver atendimento anterior à formalização, backfill, outro significado de signup_date ou problema de data. **A operação precisa validar a semântica antes de classificar o histórico.**
 
-Isso é grande demais para ser ignorado.
+### O que a análise adicional mostrou
 
-### O que podemos afirmar
+Para não depender desses registros ambíguos, Suporte foi reanalisado somente nos primeiros 90 dias após o signup da coorte comparável de 2024.
 
-Os tickets não representam exclusivamente suporte pós-venda.
+Foram **89 tickets em 75 das 195 contas**. Nessa janela, volume de tickets, resolução, primeira resposta, satisfação e escalonamento **não apresentaram diferença consistente capaz de explicar o evento precoce de forma geral**.
 
-### O que ainda não podemos afirmar
-
-Não podemos chamar automaticamente esses 1.190 registros de “pré-venda”.
-
-Uma hipótese inteligente é que o canal de atendimento esteja sendo usado também para dúvidas antes da compra, avaliação do produto, atendimento durante negociação, preparação para contratação ou outras interações anteriores à formalização.
-
-Mas existe outra hipótese igualmente importante: **a relação temporal entre ticket e cadastro pode estar representando processos ou datas diferentes do que imaginamos.**
-
-Isso precisa ser validado com quem conhece a operação.
+Portanto, a ação não é “corrigir Suporte porque ele causa churn”. A ação é **melhorar o contexto do dado e usar Suporte como sensor da jornada**.
 
 ### O que Suporte deve fazer agora
 
-Não esperar essa investigação terminar.
+1. Validar com a operação uma amostra dos tickets anteriores ao signup e documentar o que essas datas representam.
+2. Para todo novo ticket, registrar **etapa da jornada** e **motivo do contato**.
+3. Registrar **problema → solução → pendência → área que precisa agir → próximo passo**.
 
-Todo novo ticket deve ganhar **contexto de jornada**.
-
-Um conjunto mínimo poderia ser:
-
-**etapa da jornada:** pré-cadastro/lead; negociação; onboarding; cliente ativo; renovação; encerramento; pós-encerramento.
-
-**motivo do contato:** dúvida comercial; configuração/onboarding; dificuldade de uso; erro técnico; cobrança; solicitação de funcionalidade; cancelamento/renovação; outro.
-
-E registrar:
-
-**problema → solução → pendência → área que precisa agir → próximo passo.**
+Um conjunto inicial de etapas pode ser: pré-cadastro/lead; negociação; onboarding; cliente ativo; renovação; encerramento; pós-encerramento. Essa taxonomia deve ser ajustada após a validação operacional, não imposta ao histórico.
 
 ### Por que isso importa
 
-Hoje um ticket pode representar desde uma dúvida comercial até uma falha grave de produto.
-
-Sem essa distinção, “quantidade de tickets” mistura comportamentos completamente diferentes.
-
-Com a classificação, Suporte deixa de ser apenas uma área que **resolve chamados** e passa a gerar inteligência sobre a jornada.
+Hoje “quantidade de tickets” mistura momentos potencialmente diferentes. Com contexto de jornada, Suporte passa a produzir inteligência acionável para Comercial, CS e Produto sem transformar correlação em causa.
 
 ---
 
-## 5. Produto
+## 5. Produto — recuperar o valor dos 25 mil registros sem esconder a falha de vínculo
 
-### O cuidado necessário
+### O que a nova investigação mostrou
 
-Existem **25.000 registros de uso**, mas apenas **5.568** acontecem dentro da janela temporal da própria assinatura à qual estão vinculados.
+Dos **25.000 registros de uso**:
 
-Isso não torna os outros 19.432 registros inúteis.
+- 5.568 estão dentro da assinatura originalmente vinculada;
+- 19.142 aparecem antes dessa assinatura;
+- 290 aparecem depois do encerramento;
+- **4.689 dos 19.142 anteriores coincidem com outra assinatura paga da mesma conta**.
 
-Significa que não devemos usá-los automaticamente para afirmar coisas como:
+Portanto, não é correto tratar os 19.432 registros fora da janela original como “uso inútil”. Parte do problema está no **vínculo com a linha de assinatura**.
 
-> “baixo uso provoca churn”.
+Também existem 21 identificadores de uso repetidos, envolvendo 42 linhas (0,17%). Isso não muda os principais achados, mas precisa ser corrigido na captura.
 
-A relação temporal precisa ser entendida primeiro.
+### O que conseguimos recuperar
 
-### Ação imediata
+Produto foi reanalisado no nível da conta, usando os **primeiros 90 dias após signup** da coorte comparável de 2024.
 
-Produto e Dados devem definir o significado operacional de:
+Essa abordagem recuperou **2.940 registros** e cobriu **194 das 195 contas**. Volume, intensidade, duração, variedade de funcionalidades e frequência de uso ficaram muito semelhantes entre contas com e sem evento precoce. Os erros também não mostraram deterioração consistente que sustente Produto como explicação geral.
 
-**conta → assinatura → usuário → sessão/uso → funcionalidade → erro → data.**
+### O que fazer agora
 
-E novos registros precisam preservar essa relação.
+**Produto + Dados** devem:
 
-### O que Produto deveria acompanhar
+1. corrigir a relação **conta → assinatura → uso → funcionalidade → erro → data**;
+2. impedir novos registros com identificador de uso duplicado;
+3. acompanhar ativação, funcionalidades relevantes adotadas, erros, bloqueios, evolução e perda de uso;
+4. conectar esses sinais aos tickets classificados e aos marcos de CS;
+5. usar esses sinais para investigar contas e fricções específicas, **não como causa automática de churn**.
 
-Em vez de apenas volume de uso:
+### Por que isso importa
 
-**ativação → funcionalidades relevantes adotadas → erros encontrados → bloqueios recorrentes → evolução do uso → perda de uso → recuperação.**
-
-### Nova oportunidade
-
-Quando Suporte classificar corretamente os tickets, Produto passa a conseguir responder perguntas melhores:
-
-- Quais funcionalidades geram mais dificuldade?
-- Quais problemas técnicos impedem onboarding?
-- Existem erros repetidos antes de uma conta reduzir uso?
-- Algum problema aparece repetidamente em determinado plano ou perfil?
-
-Hoje essa conexão é frágil. O processo futuro deve torná-la possível.
+A base de Produto contém informação útil. A decisão correta não é descartá-la nem superinterpretá-la: é **preservar o sinal, corrigir a relação temporal e conectá-lo à jornada**.
 
 ---
 
@@ -448,6 +425,8 @@ Eu não colocaria tudo em uma fila.
 **Comercial + CS:** analisar as 22 Organic × Enterprise e implantar handoff mínimo para novas vendas.
 
 **Suporte:** validar o significado dos tickets anteriores ao signup e implantar a nova classificação para tickets novos.
+
+**Produto + Dados:** corrigir o vínculo entre conta, assinatura e uso, mantendo os sinais de adoção/erro disponíveis para investigação sem transformá-los em causa automática.
 
 **Financeiro + RevOps:** começar a classificação das 92 contas e estruturar os movimentos econômicos daqui para frente.
 
