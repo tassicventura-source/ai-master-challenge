@@ -254,11 +254,11 @@ footer.foot{margin-top:56px; padding-top:18px; border-top:1px solid var(--line);
     <div class="method-grid">
       <div>
         <h3 style="font-size:14px;margin:0 0 6px;">Conceitos que não podem ser confundidos</h3>
-        <div class="def-item"><div class="t">Conta ativa</div><div class="d">churn_flag = falso em accounts.csv — a conta segue cliente hoje.</div></div>
-        <div class="def-item"><div class="t">Evento de saída</div><div class="d">Uma linha em churn_events.csv — um registro de cancelamento. A mesma conta pode ter mais de um ao longo do tempo.</div></div>
-        <div class="def-item"><div class="t">Churn confirmado</div><div class="d">churn_flag = verdadeiro em accounts.csv — status mais recente, não um evento datado.</div></div>
+        <div class="def-item"><div class="t">Flag em accounts</div><div class="d"><code>accounts.churn_flag</code> é uma classificação registrada na tabela de contas; não prova, sozinha, estado econômico final.</div></div>
+        <div class="def-item"><div class="t">Churn event</div><div class="d">Uma linha em <code>churn_events.csv</code>. O Relatório Final mostra que esses eventos não se comportam consistentemente como saída definitiva.</div></div>
+        <div class="def-item"><div class="t">Perda econômica real</div><div class="d">Só pode ser confirmada após reconciliar conta, contrato, cobrança, pagamento e MRR antes/depois.</div></div>
         <div class="def-item"><div class="t">Reativação</div><div class="d">Conta que teve um evento de saída e voltou a ter assinatura ativa depois.</div></div>
-        <div class="def-item"><div class="t">MRR em risco</div><div class="d">MRR mais recente das contas hoje churned — aproximação, não é o valor exato no momento da saída.</div></div>
+        <div class="def-item"><div class="t">Refund / crédito</div><div class="d">Valor registrado no evento; não deve ser convertido automaticamente em receita perdida.</div></div>
       </div>
       <div>
         <h3 style="font-size:14px;margin:0 0 6px;">Fontes e ressalvas</h3>
@@ -267,9 +267,9 @@ footer.foot{margin-top:56px; padding-top:18px; border-top:1px solid var(--line);
         <div class="caveat">✓ feature_usage.csv · 25.000 registros</div>
         <div class="caveat">✓ support_tickets.csv · 2.000 tickets</div>
         <div class="caveat">✓ churn_events.csv · 600 eventos</div>
-        <div class="caveat">⚠ accounts.churn_flag e churn_events.csv não coincidem perfeitamente — ver achado "Um churn ou três?". Tratamos os dois como verdadeiros ao mesmo tempo, cada um respondendo uma pergunta diferente.</div>
+        <div class="caveat">⚠ 400 das 500 contas não têm a mesma classificação entre accounts.churn_flag, presença de churn_event e encerramento de linha paga.</div>
         <div class="caveat">⚠ Dados sintéticos — os padrões aqui não devem ser lidos como fatos sobre clientes de SaaS reais.</div>
-        <div class="caveat">⚠ Segmentos com poucas contas (ex.: países com n&lt;30) têm taxa mais instável — leia com cautela.</div>
+        <div class="caveat">⚠ Subscriptions se sobrepõem; uso e suporte também têm inconsistências temporais materiais. Métricas econômicas e sinais de risco exigem reconciliação.</div>
       </div>
     </div>
   </section>
@@ -453,20 +453,19 @@ function renderSegments(base){
 }
 
 const FINDINGS = [
-  {t:'Um "churn" ou três?', body:'<span class="tag-fact">FATO</span>churn_flag marca <b>22,0%</b> da base como perdida. Mas <b>70,4%</b> das contas já aparecem em churn_events.csv alguma vez. Os dois números respondem perguntas diferentes.<br><br><span class="tag-hyp">HIPÓTESE</span>Parte da diferença é reativação (43 contas voltaram e ficaram). O resto sugere que os sistemas de origem não têm uma definição única de "cliente perdido" — alinhar isso antes de reportar qualquer número de churn para a diretoria.'},
-  {t:'A satisfação não separa quem sai de quem fica', body:'<span class="tag-fact">FATO</span>Nota média de suporte: <b>4,01/5</b> entre quem churnou vs. <b>3,97/5</b> entre quem ficou — praticamente igual. Só <b>58,8%</b> dos tickets recebem alguma nota.<br><br><span class="tag-hyp">HIPÓTESE</span>A pesquisa de satisfação atual não captura o motivo real por trás do "Support" como razão de saída.'},
-  {t:'O uso por conta está encolhendo — mas não avisa churn individual', body:'<span class="tag-fact">FATO</span>Uso total da plataforma ficou estável (~10–11 mil/mês) por 24 meses, enquanto a base cresceu de 17 para 500 contas. Uso por conta caiu de ~90–110/mês (meados de 2023) para ~21–25/mês (final de 2024).<br><br><span class="tag-hyp">HIPÓTESE</span>Não é alarme por conta: dentro de cada conta que churnou, o uso nos últimos 60 dias foi igual ao dos primeiros 60. Parece efeito de onboarding/coorte diluindo a média — não um cliente individual "esfriando".'},
-  {t:'Upgrade recente antecede churn 2,3× mais que downgrade', body:'<span class="tag-fact">FATO</span><b>20,5%</b> dos eventos tiveram upgrade nos 90 dias anteriores; só <b>8,8%</b> tiveram downgrade.<br><br><span class="tag-hyp">HIPÓTESE</span>Parece expansão que não gerou valor percebido — mais do que insatisfação gradual.'}
+  {t:'As três representações de churn não concordam', body:'<span class="tag-fact">FATO</span><b>110</b> contas têm accounts.churn_flag=true; <b>352</b> têm ao menos um churn_event; <b>288</b> têm ao menos uma linha paga encerrada. Em <b>400 das 500 contas</b>, as três representações não estão alinhadas.<br><br><span class="tag-hyp">LEITURA</span>Antes de explicar churn econômico, é necessário reconciliar qual movimento realmente terminou em perda.'},
+  {t:'O evento registrado não se comporta como saída definitiva', body:'<span class="tag-fact">FATO</span>Dos <b>600 churn_events</b>, <b>531</b> acontecem enquanto existe uma linha paga vigente, <b>67</b> antes do primeiro pagamento e <b>2</b> entre relações pagas — e essas duas contas voltam a pagar depois.<br><br><span class="tag-hyp">LEITURA</span>churn_event é um sinal de lifecycle, não uma taxa pronta de cliente perdido.'},
+  {t:'2024 cresceu em volume e valor enquanto os eventos precoces aumentaram', body:'<span class="tag-fact">FATO</span>Novos cadastros passaram de <b>227 para 273</b> (+20,3%) e o valor de entrada de <b>US$ 503,6 mil para US$ 891,7 mil</b> (+77,1%). Entre contas com 90 dias completos, evento precoce passou de <b>19,4% para 47,2%</b>.<br><br><span class="tag-hyp">LEITURA</span>Esse salto não equivale a piora proporcional da retenção; continuidade paga e janela de observação mudam a interpretação.'},
+  {t:'Organic × Enterprise é prioridade de investigação, não segmento condenado', body:'<span class="tag-fact">FATO</span>Organic respondeu por <b>64,6%</b> do crescimento do valor de entrada. Entre as 22 contas Organic com primeira entrada Enterprise de 2024 e 90 dias completos, <b>14</b> registraram evento precoce.<br><br><span class="tag-hyp">LEITURA</span>É onde crescimento econômico e ambiguidade de lifecycle mais se encontram.'},
+  {t:'Produto, suporte e reason codes não fecham a causa geral', body:'<span class="tag-fact">FATO</span><b>19.142 de 25.000</b> registros de uso antecedem a subscription associada e <b>1.077 de 2.000</b> tickets aparecem antes do signup. Nos dados válidos, não surge deterioração geral consistente antes dos eventos.<br><br><span class="tag-hyp">LEITURA</span>Produto, suporte, preço e concorrência continuam hipóteses para casos específicos, não causas gerais comprovadas.'},
+  {t:'Refund/crédito é ajuste registrado, não perda comprovada', body:'<span class="tag-fact">FATO</span>Há <b>US$ 8.652,25</b> em refund/crédito, em 142 eventos de 120 contas. <b>129 de 142</b> acontecem enquanto existe linha paga vigente.<br><br><span class="tag-hyp">LEITURA</span>O valor merece investigação financeira, mas não deve ser chamado de churn de receita ou caixa perdido sem vínculo com cobrança e desfecho econômico.'}
 ];
 function renderFindings(){ document.getElementById('find-grid').innerHTML = FINDINGS.map(f=>'<div class="find-card"><h3>'+f.t+'</h3><p>'+f.body+'</p></div>').join(''); }
 
 const ACTIONS = [
-  {h:'Rever a qualificação de leads do canal Event', d:'Event tem a maior taxa de churn (30,2%) e a maior fatia de MRR em risco (39%). Todos os planos dentro de Event saem mais.', imp:'Alto · rápido'},
-  {h:'Criar check-in pós-upgrade em D+30 e D+60', d:'Upgrade recente antecede churn 2,3× mais que downgrade. Toque estruturado da CS logo após a expansão.', imp:'Alto · barato'},
-  {h:'Investigar "Support" com entrevista, não só nota', d:'Support é 17,3% dos eventos mas 21,7% do MRR perdido, e a nota de satisfação não mostra diferença entre quem sai e quem fica.', imp:'Alto · médio prazo'},
-  {h:'Plano de conta dedicado para DevTools de maior MRR', d:'Maior taxa de churn entre indústrias (31,0%) e maior fatia de MRR em risco (34,9%).', imp:'Médio · rápido'},
-  {h:'Corrigir a captura do motivo de saída', d:'"Unknown" é 15,8% dos casos — quase 1 em 6 saídas sem motivo registrado.', imp:'Baixo custo · fundacional'},
-  {h:'Unificar a definição de churn entre sistemas', d:'accounts.churn_flag e churn_events.csv não coincidem em quase 300 contas.', imp:'Fundacional · governança'}
+  {h:'Fechar o desfecho econômico das 92 contas por trás dos 47,2%', d:'Financeiro, RevOps e Dados: reconciliar contrato, fatura, pagamento, subscription relacionada ao evento e MRR antes/depois. Classificar cada caso como perda total, contração, expansão, pausa, troca/recontratação, reativação, refund/crédito ou evento sem perda comprovada.', imp:'10 dias úteis'},
+  {h:'Proteger o crescimento enquanto testa sua qualidade', d:'Aquisição, Comercial, CS e Produto: reconstruir as 22 jornadas Organic × Enterprise comparáveis de 2024 — 14 com evento e 8 sem — e abrir o canal Event por campanha/origem.', imp:'2 semanas'},
+  {h:'Criar uma verdade operacional única por conta', d:'Dados + RevOps: conectar conta → contrato → subscription → cobrança → pagamento → MRR antes/depois → movimento → estado final; integrar promessa, primeiro valor, uso, suporte, responsável e próxima ação.', imp:'30–60 dias'}
 ];
 function renderActions(){ document.getElementById('actions-list').innerHTML = ACTIONS.map((a,i)=>'<div class="action"><div class="num">'+(i+1)+'</div><div><h4>'+a.h+'</h4><p>'+a.d+'</p></div><div class="impact">'+a.imp+'</div></div>').join(''); }
 
