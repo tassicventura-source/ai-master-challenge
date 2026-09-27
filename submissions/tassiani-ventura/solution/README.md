@@ -91,7 +91,7 @@ As regras, grãos e limitações analíticas estão em [`docs/RETENTION_OPERATIN
 
 - `app.py` — entrada Streamlit e navegação.
 - `src/operating_store.py` — persistência transacional e regras canônicas.
-- `src/operational_ui.py` — Meu trabalho, Clientes, Cliente 360, tarefas, pipeline, inteligência e gestão.
+- `src/operational_ui.py` — Minha fila, Clientes, Cliente 360, tarefas, pipeline, inteligência e gestão.
 - `src/action_store.py` — ações da Central, SQLite demo/PostgreSQL e trilha.
 - `src/retention.py`, `src/retention_ui.py` — regras de sinalização histórica explicável.
 - `data/raw/`, `data/processed/`, `data/audit/` — fontes preservadas, saídas analíticas e verificações.
