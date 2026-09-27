@@ -94,6 +94,8 @@ footer{padding-top:34px;color:var(--muted);font-size:12px}
   <h2>Quando seguimos as contas depois do evento, o registro não se comporta como saída</h2>
   <p>Os 600 <code>churn_events</code> acontecem em três contextos diferentes. Em nenhum deles o evento, sozinho, identifica uma perda definitiva de cliente ou de receita.</p>
 
+  <p>A própria tabela reforça essa leitura: entre os 600 registros chamados <code>churn_events</code>, <strong>61 estão marcados como reativação, 123 possuem upgrade precedente e 53 possuem downgrade precedente</strong>. Portanto, o campo reúne diferentes movimentos da jornada e não apenas saídas definitivas.</p>
+
   <div class="event-flow">
     <div class="flow-bar"><div class="seg1"></div><div class="seg2"></div><div class="seg3"></div></div>
     <div class="flow-legend">
@@ -104,6 +106,8 @@ footer{padding-top:34px;color:var(--muted);font-size:12px}
   </div>
 
   <p>A mesma contradição aparece na base de assinaturas. Das <strong>408 linhas pagas encerradas</strong>, 399 tinham outra linha paga vigente na mesma data. Nas 9 restantes, outra linha paga começa entre <strong>3 e 157 dias</strong> depois. Somar o MRR dessas linhas encerradas (US$ 1.179.139) e chamá-lo de receita perdida seria incorreto.</p>
+
+  <p>No fechamento da base, <strong>todas as 500 contas possuem pelo menos uma linha paga ativa</strong>, inclusive as contas que registraram evento precoce. Isso não prova que nenhuma perda econômica tenha ocorrido ao longo da jornada, mas confirma que encerramento de linha e <code>churn_event</code> não podem ser tratados automaticamente como perda definitiva da conta.</p>
 
   <p>As próprias representações de churn entram em conflito: <strong>400 das 500 contas</strong> não têm a mesma classificação entre <code>accounts.churn_flag</code>, presença de <code>churn_event</code> e encerramento de linha paga.</p>
 
@@ -210,9 +214,11 @@ footer{padding-top:34px;color:var(--muted);font-size:12px}
 
 <section>
   <h2>Produto, suporte e os motivos declarados não explicam o fenômeno geral</h2>
-  <p>As hipóteses de falha de Produto ou Suporte foram investigadas, mas a evidência não fecha uma explicação geral. Parte importante desses dados também tem problemas temporais: <strong>19.142 dos 25.000 registros de uso</strong> precedem o início da assinatura à qual estão ligados, e apenas 5.568 ficam dentro da janela temporal da própria assinatura. Em Suporte, <strong>1.077 dos 2.000 chamados</strong> aparecem antes do cadastro da conta.</p>
+  <p>As hipóteses de falha de Produto ou Suporte foram investigadas, mas a evidência não fecha uma explicação geral. A inconsistência temporal exigiu uma segunda investigação. Dos 25.000 registros de uso, apenas 5.568 estão dentro da assinatura originalmente associada, mas parte dos demais registros coincide com outra assinatura da mesma conta. Por isso, em vez de descartar esses dados, Produto foi reanalisado no nível da conta e da jornada. Nos primeiros 90 dias após o cadastro, volume de uso, intensidade, duração, variedade de funcionalidades e erros não apresentaram diferença consistente capaz de explicar, de forma geral, quais contas registrariam evento precoce.</p>
 
-  <p>Nos registros temporalmente válidos, não surge uma deterioração consistente antes dos eventos. Além disso, os motivos declarados também não se comportam como motivos de saída definitiva. Entre os eventos com 90 dias de acompanhamento, todos os motivos registrados apresentam nova linha paga em até 90 dias em taxas entre <strong>76,9% e 87,9%</strong>.</p>
+  <p>Suporte passou pelo mesmo tratamento: <strong>1.077 dos 2.000 chamados</strong> aparecem antes do cadastro, o que impede interpretá-los automaticamente como atendimento pós-venda ou pré-venda. Quando a comparação é limitada aos 90 dias posteriores ao cadastro, volume de tickets, tempo de resposta, resolução, satisfação e escalonamento também não apresentam diferença material capaz de explicar o fenômeno geral.</p>
+
+  <p>Além disso, os motivos declarados também não se comportam como motivos de saída definitiva. Entre os eventos com 90 dias de acompanhamento, todos os motivos registrados apresentam nova linha paga em até 90 dias em taxas entre <strong>76,9% e 87,9%</strong>.</p>
 
   <div class="table-wrap" style="max-width:620px"><table>
     <thead><tr><th>Motivo registrado</th><th>Eventos com 90d</th><th>Nova linha paga em até 90d</th></tr></thead>
