@@ -1,3 +1,5 @@
+> **Registro histórico de desenvolvimento.** Este handoff preserva o estado de uma etapa intermediária e foi **substituído pela validação final em [`docs/VALIDACAO.md`](docs/VALIDACAO.md)**. Itens descritos abaixo como pendentes não representam o estado final da entrega.
+
 # HANDOFF — RavenStack Customer Journey
 
 **Estado em 2026-09-27 08:10 (America/Sao_Paulo).** Projeto: `/home/ubuntu/work/github/ai-master-challenge/submissions/tassiani-ventura/solution`. Repo Git raiz: `/home/ubuntu/work/github/ai-master-challenge`; branch `submission/tassiani-ventura`, remote `origin` = `tassicventura-source/ai-master-challenge`.
