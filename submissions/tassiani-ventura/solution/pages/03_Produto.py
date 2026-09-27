@@ -23,7 +23,7 @@ if not feat.empty:
     fig.update_layout(height=340, margin=dict(t=20, b=30))
     st.plotly_chart(fig,width='stretch',config={'displayModeBar':False})
 with st.expander('Ver todas as funcionalidades'): table(feat,'produto_funcionalidades.csv')
-feature=st.selectbox('Investigar funcionalidade',['Todas']+feat.feature_name.sort_values().tolist())
+feature=st.selectbox('Escolher funcionalidade para ver detalhes',['Todas']+feat.feature_name.sort_values().tolist())
 selected=uv if feature=='Todas' else uv[uv.feature_name.eq(feature)]
 selected=selected.groupby('account_id').agg(usage=('usage_count','sum'),errors=('error_count','sum')).reset_index()
 accounts=selected.merge(a[['account_id','account_name','initial_value_registered']],on='account_id',validate='one_to_one').sort_values('errors',ascending=False)

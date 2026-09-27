@@ -130,7 +130,7 @@ def _show_detail(signal: pd.Series, scope: str) -> None:
         st.json(signal.evidence, expanded=True)
         st.caption("Fontes: " + ", ".join(signal.source_refs))
         st.caption("Regra de prioridade: " + signal.priority_reason)
-    if st.button("Abrir esta conta no Conta 360", key=f"open_account_{scope}_{signal.signal_id}"):
+    if st.button("Abrir ficha do cliente", key=f"open_account_{scope}_{signal.signal_id}"):
         st.session_state["requested_account_id"] = str(signal.account_id)
         st.switch_page("pages/01_Conta_360.py")
     _show_action_editor(signal, scope)
@@ -155,15 +155,15 @@ def _show_detail(signal: pd.Series, scope: str) -> None:
 
 def render_retention_central() -> None:
     signals = load_signals()
-    st.title("Central de Retenção")
-    st.write("Transforme sinais observados em decisões, ações com responsável e prazo, e acompanhamento do resultado.")
-    st.page_link("pages/09_Operacao_CRM.py", label="Cadastrar cliente/lead · abrir pipeline · registrar atuação comercial", icon="👥")
-    st.warning(f"Sinais históricos até {OBSERVATION_CUTOFF} para triagem e reconciliação agora — não monitoram estado atual da conta. São regras explícitas, sem score preditivo; evento legado, erro, ticket e valor inicial não confirmam churn ou perda econômica.")
+    st.title("Revisar sinais históricos")
+    st.write("Para cada registro antigo: entenda o fato e seus limites, decida se ainda requer contato e, se sim, registre responsável, prazo e resultado.")
+    st.page_link("pages/09_Operacao_CRM.py", label="Para cadastrar uma oportunidade ou registrar contato, abra Vendas e oportunidades", icon="👥")
+    st.warning(f"Os dados terminam em {OBSERVATION_CUTOFF}. Eles não monitoram o estado atual. Cada regra é explícita e mostra evidência/limites; evento antigo, erro, ticket ou valor inicial não comprovam cancelamento ou perda de receita.")
     open_count, overdue, total = _action_summary()
     c1, c2, c3 = st.columns(3)
-    c1.metric("Sinais para triagem", len(signals))
-    c2.metric("Ações abertas", open_count)
-    c3.metric("Ações fora do prazo", overdue)
+    c1.metric("Registros antigos para revisar", len(signals))
+    c2.metric("Acompanhamentos em aberto", open_count)
+    c3.metric("Acompanhamentos atrasados", overdue)
     noun = "ação persistida" if total == 1 else "ações persistidas"
     st.caption(f"{total} {noun} no modo demo · ordenação: prioridade operacional explicada, data do registro (mais antiga primeiro) e ID estável.")
     with st.expander("Como as filas e prioridades são calculadas"):

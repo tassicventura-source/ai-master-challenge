@@ -15,7 +15,7 @@ python -m pip install -r requirements.txt
 python -m streamlit run app.py
 ```
 
-O app constrói/valida as saídas analíticas e cria o store operacional na primeira execução. A tela inicial é **Meu trabalho**. A primeira utilização importa, de forma idempotente, os 500 clientes históricos como `legacy / not_validated`, sem promover churn, assinatura, seats ou MRR antigos a estado atual.
+O app constrói/valida as saídas analíticas e cria o store operacional na primeira execução. A tela inicial é **Minha fila**. A primeira utilização importa, de forma idempotente, os 500 clientes históricos como `legacy / not_validated`, sem promover churn, assinatura, seats ou MRR antigos a estado atual.
 
 Para reconstruir explicitamente os dados analíticos e rodar a suíte:
 
@@ -32,13 +32,16 @@ npm run test:browser
 
 ## Fluxo operacional
 
-- **Meu trabalho:** tarefas de hoje, vencidas, próximas, renovações confirmadas, alertas e ações históricas atribuídas a quem está operando.
-- **Clientes:** pesquisa/filtros por lifecycle, responsável, origem e qualidade; cadastro nativo cria cliente, owner, assinatura inicial, eventos e tarefa na mesma transação.
-- **Cliente 360:** resumo/próxima ação, interações, jornada com antes/depois e autoria, subscriptions, prévia de movimentos econômicos, tarefas/alertas, ações ligadas a sinais e evidências/fonte histórica.
-- **Tarefas & alertas:** criar/atualizar/concluir tarefas; ver alertas abertos/tratados/resolvidos sem apagar o histórico.
-- **Comercial · pipeline:** cadastrar lead sem fingir que oportunidade é cliente/receita atual, mover etapa e registrar atuações.
-- **Inteligência e Gestão:** regras determinísticas/alertas atuais e resumo da carteira; não substituem o fluxo operacional.
-- **Central de Retenção histórica e análises por área:** investigações existentes, em navegação secundária, mantidas com suas regras documentadas.
+- **Minha fila:** mostra o que você deve fazer hoje, o que atrasou e alertas para conferir; selecione seu nome para ver suas tarefas.
+- **Clientes:** encontre ou cadastre uma conta e abra sua ficha.
+- **Ficha do cliente:** registro único de atendimento — contexto, contatos, próxima ação, contrato confirmado, mudanças e histórico.
+- **Tarefas e alertas:** crie, atribua, reagende ou conclua tarefas. Alertas são lembretes verificáveis; marcá-los como tratados não apaga o histórico.
+- **Vendas e oportunidades:** cadastre uma venda em andamento, atualize sua etapa comercial e registre contatos; valores estimados não são receita realizada.
+- **Prioridades da carteira:** veja pendências atuais e, em área separada, fatos históricos que podem merecer conferência. Não é previsão de churn.
+- **Acompanhamento da equipe:** visão para coordenação — atrasos, clientes ativos sem próxima ação e distribuição da carga.
+- **Consulta histórica (dados até 2024):** registros antigos preservados para comparação. “Jornada e áreas” e “Dados e arquitetura” continuam no código, mas ficam fora do menu de trabalho porque são material técnico, não uma ação diária do usuário.
+
+Os estados persistidos podem ter nomes internos em inglês para manter o contrato do banco; todos os estados operacionais mostrados em filtros e filas são apresentados em português.
 
 As mudanças econômicas exigem confirmação humana e registram o movimento. A prévia deixa o delta desconhecido quando falta confirmação ou quando moedas não são comparáveis. `churn_event`, fim administrativo de linha, erro, ticket, refund informado e ausência de uso não são convertidos em churn ou perda econômica confirmada.
 
@@ -84,7 +87,7 @@ As regras, grãos e limitações analíticas estão em [`docs/RETENTION_OPERATIN
 
 - `app.py` — entrada Streamlit e navegação.
 - `src/operating_store.py` — persistência transacional e regras canônicas.
-- `src/operational_ui.py` — Meu trabalho, Clientes, Cliente 360, tarefas, pipeline, inteligência e gestão.
+- `src/operational_ui.py` — Minha fila, Clientes, Ficha do cliente, tarefas, oportunidades, prioridades e acompanhamento da equipe.
 - `src/action_store.py` — ações da Central, SQLite demo/PostgreSQL e trilha.
 - `src/retention.py`, `src/retention_ui.py` — regras de sinalização histórica explicável.
 - `data/raw/`, `data/processed/`, `data/audit/` — fontes preservadas, saídas analíticas e verificações.

@@ -33,9 +33,9 @@ async function choose(page, label, value) {
     const context = await browser.newContext({viewport:{width:1440,height:1000}, acceptDownloads:true});
     const page = await context.newPage();
     const pageErrors=[]; page.on('pageerror', e=>pageErrors.push(e.message));
-    await page.goto(base); await page.getByRole('heading',{name:'Meu trabalho',exact:true}).waitFor();
+    await page.goto(base); await page.getByRole('heading',{name:'Minha fila',exact:true}).waitFor();
     await page.screenshot({path:'docs/screenshots/meu-trabalho-desktop.png',fullPage:true});
-    results.push({criterion:'A15',home:'Meu trabalho'});
+    results.push({criterion:'A15',home:'Minha fila'});
 
     const actor='QA Browser RavenStack';
     const actorInput=page.getByRole('textbox',{name:'Quem está usando? (MVP)'});
@@ -55,7 +55,7 @@ async function choose(page, label, value) {
     await page.getByLabel('MRR informado *').fill('1200');
     await page.getByLabel('Primeira tarefa / próxima ação *').fill('Fazer kickoff');
     await page.getByRole('button',{name:'Criar cliente e abrir jornada',exact:true}).click();
-    await page.getByRole('heading',{name:'Cliente 360',exact:true}).waitFor();
+    await page.getByRole('heading',{name:'Ficha do cliente',exact:true}).waitFor();
     await page.getByText(customer,{exact:true}).waitFor();
     results.push({criterion:'A01/A02',customer,validated:true,opened:true});
 
@@ -65,14 +65,14 @@ async function choose(page, label, value) {
     await page.getByRole('textbox',{name:'Responsável pela próxima ação *',exact:true}).fill(actor);
     await page.getByRole('button',{name:'Salvar interação',exact:true}).click();
     await page.getByText('Interação registrada na jornada e tarefa criada.').waitFor();
-    const journeyTab=page.getByRole('tab',{name:'Jornada',exact:true});
+    const journeyTab=page.getByRole('tab',{name:'Contatos e jornada',exact:true});
     await journeyTab.click();
-    await page.waitForFunction(()=>[...document.querySelectorAll('[role="tab"]')].some(x=>x.textContent.trim()==='Jornada' && x.getAttribute('aria-selected')==='true'));
+    await page.waitForFunction(()=>[...document.querySelectorAll('[role="tab"]')].some(x=>x.textContent.trim()==='Contatos e jornada' && x.getAttribute('aria-selected')==='true'));
     await page.getByRole('tabpanel').getByText('Ligação registrada.',{exact:true}).waitFor();
     results.push({criterion:'A05/A06',interaction:true,taskAssigned:actor});
 
-    await nav(page,'Meu trabalho').click();
-    await page.getByRole('heading',{name:'Meu trabalho',exact:true}).waitFor();
+    await nav(page,'Minha fila').click();
+    await page.getByRole('heading',{name:'Minha fila',exact:true}).waitFor();
     const todayTab=page.getByRole('tab',{name:'Hoje',exact:true}); await todayTab.click();
     await page.waitForFunction(()=>[...document.querySelectorAll('[role="tab"]')].some(x=>x.textContent.trim()==='Hoje' && x.getAttribute('aria-selected')==='true'));
     await page.getByText(/Enviar plano de implantação/).first().waitFor();
@@ -94,54 +94,55 @@ async function choose(page, label, value) {
     if(Number(treatedCount)<1) throw new Error('Treated overdue alert not preserved in history');
     results.push({criterion:'A11',alertTreated:true,historyPreserved:true});
 
-    await nav(page,'Cliente 360').click();
-    await page.getByRole('heading',{name:'Cliente 360',exact:true}).waitFor();
-    await page.getByRole('tab',{name:'Assinatura & receita',exact:true}).click();
+    await nav(page,'Ficha do cliente').click();
+    await page.getByRole('heading',{name:'Ficha do cliente',exact:true}).waitFor();
+    await page.getByRole('tab',{name:'Contrato e receita',exact:true}).click();
     const newMrr=page.getByLabel('Novo MRR confirmado'); await newMrr.fill('1500');
     await page.getByLabel('Motivo da mudança *').fill('Upgrade confirmado no teste browser.');
     await page.getByRole('button',{name:'Confirmar alteração de assinatura',exact:true}).click();
     await page.getByText(/Assinatura atualizada; delta MRR \+300\.00/).waitFor();
     results.push({criterion:'A08/A12',subscriptionChange:true,delta:300});
 
-    await page.getByRole('tab',{name:'Assinatura & receita',exact:true}).click();
+    await page.getByRole('tab',{name:'Contrato e receita',exact:true}).click();
     await page.getByRole('checkbox',{name:'Adicionar uma nova assinatura em paralelo (não substituir a atual)'}).check({force:true});
     await page.getByLabel('Novo MRR confirmado').fill('500');
     await page.getByLabel('Motivo da mudança *').fill('Segunda linha confirmada para QA de encerramento administrativo.');
     await page.getByRole('button',{name:'Confirmar alteração de assinatura',exact:true}).click();
     await page.getByText(/Assinatura atualizada; delta MRR/).waitFor();
-    const subscriptionTab=page.getByRole('tab',{name:'Assinatura & receita',exact:true});
+    const subscriptionTab=page.getByRole('tab',{name:'Contrato e receita',exact:true});
     await subscriptionTab.click();
-    await page.waitForFunction(()=>[...document.querySelectorAll('[role="tab"]')].some(x=>x.textContent.trim()==='Assinatura & receita' && x.getAttribute('aria-selected')==='true'));
+    await page.waitForFunction(()=>[...document.querySelectorAll('[role="tab"]')].some(x=>x.textContent.trim()==='Contrato e receita' && x.getAttribute('aria-selected')==='true'));
     await choose(page,'Movimento explícito','Encerramento administrativo de uma linha');
     await page.getByLabel('Motivo informado *').fill('Encerramento administrativo de uma linha; outra continua ativa.');
     await page.getByRole('button',{name:'Confirmar movimento',exact:true}).click();
-    await page.getByText(/Movimento admin_end registrado\. Lifecycle: active/).waitFor();
-    await page.getByRole('tab',{name:'Assinatura & receita',exact:true}).click();
+    await page.getByText(/Mudança registrada: Encerramento administrativo de uma linha\. Situação da relação: Ativa/).waitFor();
+    await page.getByRole('tab',{name:'Contrato e receita',exact:true}).click();
     await choose(page,'Movimento explícito','Perda total da conta');
     await page.getByRole('checkbox',{name:'Confirmo a perda total verificada com o cliente\/sistema oficial'}).check({force:true});
     await page.getByLabel('Motivo informado *').fill('Perda total confirmada pelo cliente no QA.');
     await page.getByRole('button',{name:'Confirmar movimento',exact:true}).click();
-    await page.getByText(/Movimento total_loss registrado\. Lifecycle: churned/).waitFor();
+    await page.getByText(/Mudança registrada: Encerramento confirmado\. Situação da relação: Encerrada/).waitFor();
     results.push({criterion:'A09/A10',explicitLoss:true,administrativeEndPreservesRemainingActiveLine:true});
 
-    await nav(page,'Central de Retenção histórica').click();
-    await page.getByRole('heading',{name:'Central de Retenção',exact:true}).waitFor();
+    await nav(page,'Revisar sinais históricos').click();
+    await page.getByRole('heading',{name:'Revisar sinais históricos',exact:true}).waitFor();
     const owner=page.getByLabel('Responsável'); await owner.fill(actor);
     await page.getByRole('button',{name:'Salvar ação',exact:true}).click();
     await page.getByText(/Ação persistida · ID/).waitFor();
     results.push({criterion:'signal-action',persisted:true,owner:actor});
-    await nav(page,'Meu trabalho').click();
-    await page.getByRole('tab',{name:'Ações de sinais',exact:true}).click();
-    await page.getByText(/Ação|Central|Retention|Retenção/i).first().waitFor();
+    await nav(page,'Minha fila').click();
+    const historyTab=page.getByRole('tab',{name:'Acompanhamentos históricos',exact:true}); await historyTab.click();
+    await page.waitForFunction(()=>[...document.querySelectorAll('[role="tab"]')].some(x=>x.textContent.trim()==='Acompanhamentos históricos' && x.getAttribute('aria-selected')==='true'));
+    await page.getByRole('button',{name:'Ver evidência e atualizar acompanhamento',exact:true}).waitFor();
     await page.screenshot({path:'docs/screenshots/meu-trabalho-acoes-desktop.png',fullPage:true});
 
-    await nav(page,'Cliente 360').click();
-    const picker=page.getByLabel('Buscar / selecionar cliente');
+    await nav(page,'Ficha do cliente').click();
+    const picker=page.getByLabel('Buscar um cliente para abrir a ficha');
     await picker.fill(legacyId); await picker.press('ArrowDown'); await picker.press('Enter');
     await page.getByText(/Dados importados \/ não validados/).waitFor();
-    const legacySubscriptionTab=page.getByRole('tab',{name:'Assinatura & receita',exact:true});
+    const legacySubscriptionTab=page.getByRole('tab',{name:'Contrato e receita',exact:true});
     await legacySubscriptionTab.click();
-    await page.waitForFunction(()=>[...document.querySelectorAll('[role="tab"]')].some(x=>x.textContent.trim()==='Assinatura & receita' && x.getAttribute('aria-selected')==='true'));
+    await page.waitForFunction(()=>[...document.querySelectorAll('[role="tab"]')].some(x=>x.textContent.trim()==='Contrato e receita' && x.getAttribute('aria-selected')==='true'));
     const confirmPlan=page.getByRole('checkbox',{name:'Confirmar plano'});
     await confirmPlan.waitFor({state:'visible'});
     await confirmPlan.check({force:true});
@@ -150,8 +151,9 @@ async function choose(page, label, value) {
     await page.getByLabel('Seats confirmados').fill('6');
     await page.getByRole('button',{name:'Salvar campos selecionados',exact:true}).click();
     await page.getByText('Campos selecionados validados; fontes históricas foram preservadas.').waitFor();
-    await page.getByRole('tab',{name:'Visão geral',exact:true}).click();
-    await page.getByLabel('Resumo do que aconteceu / combinado *').fill('Ligação de acompanhamento em conta legacy.');
+    const overviewTab=page.getByRole('tab',{name:'Resumo e próxima ação',exact:true}); await overviewTab.click();
+    await page.waitForFunction(()=>[...document.querySelectorAll('[role="tab"]')].some(x=>x.textContent.trim()==='Resumo e próxima ação' && x.getAttribute('aria-selected')==='true'));
+    await page.locator('textarea[aria-label="Resumo do que aconteceu / combinado *"]:visible').last().fill('Ligação de acompanhamento em conta legacy.');
     await page.getByRole('checkbox',{name:'Criar próxima ação'}).check({force:true});
     await page.getByRole('textbox',{name:'Próxima ação *',exact:true}).fill('Enviar próximos passos da conta legacy');
     await page.getByRole('textbox',{name:'Responsável pela próxima ação *',exact:true}).fill(actor);
@@ -162,12 +164,12 @@ async function choose(page, label, value) {
     results.push({criterion:'A03/A04/A13/A14',legacyUsed:true,partialValidation:true,interactionAndTaskAllowed:true,sourcePreserved:true});
 
     const routes=[
-      ['Clientes','Clientes'],['Cliente 360','Cliente 360'],['Central de Retenção histórica','Central de Retenção'],
-      ['Tarefas & alertas','Tarefas & alertas'],['Comercial · pipeline','Comercial · pipeline e atuação'],
-      ['Inteligência','Inteligência acionável'],['Gestão','Gestão da operação'],
-      ['Visão executiva','O que exige atenção agora'],['Conta 360 histórica','Conta 360 · histórico importado'],
+      ['Clientes','Clientes'],['Ficha do cliente','Ficha do cliente'],['Revisar sinais históricos','Revisar sinais históricos'],
+      ['Tarefas e alertas','Tarefas e alertas'],['Vendas e oportunidades','Vendas e oportunidades'],
+      ['Prioridades da carteira','Prioridades da carteira'],['Acompanhamento da equipe','Acompanhamento da equipe'],
+      ['Resumo histórico','O que exige atenção agora'],['Ficha histórica da conta','Ficha histórica da conta · dados até 2024'],
       ['Growth e Comercial','Growth e Comercial'],['Produto','Produto'],['Suporte e CS','Suporte e CS'],
-      ['Finance e RevOps','Finance e RevOps'],['Jornada e áreas','Fluxo da jornada do cliente'],['Dados e arquitetura','Dados & Arquitetura']
+      ['Finance e RevOps','Finance e RevOps'],
     ];
     const routeHrefs={};
     for (const [label,title] of routes) {
@@ -177,8 +179,8 @@ async function choose(page, label, value) {
     results.push({routes:routes.length+7,allOpened:true});
 
     const mobile=await browser.newPage({viewport:{width:390,height:844}});
-    await mobile.goto(base); await mobile.getByRole('heading',{name:'Meu trabalho',exact:true}).waitFor();
-    for (const [label,title] of [['Clientes','Clientes'],['Cliente 360','Cliente 360'],['Tarefas & alertas','Tarefas & alertas'],['Inteligência','Inteligência acionável'],['Gestão','Gestão da operação'],['Central de Retenção histórica','Central de Retenção']]) {
+    await mobile.goto(base); await mobile.getByRole('heading',{name:'Minha fila',exact:true}).waitFor();
+    for (const [label,title] of [['Clientes','Clientes'],['Ficha do cliente','Ficha do cliente'],['Tarefas e alertas','Tarefas e alertas'],['Prioridades da carteira','Prioridades da carteira'],['Acompanhamento da equipe','Acompanhamento da equipe'],['Revisar sinais históricos','Revisar sinais históricos']]) {
       await mobile.goto(new URL(routeHrefs[label],base).href); await mobile.getByRole('heading',{name:title,exact:true}).waitFor(); await wait(250);
       const width=await mobile.evaluate(()=>document.documentElement.scrollWidth);
       if(width>390) throw new Error('Mobile horizontal overflow on '+label+': '+width);

@@ -73,8 +73,8 @@ def account_filters(accounts, prefix):
 def open_account(accounts, key):
     if accounts.empty: return
     names=accounts.set_index('account_id')['account_name'].to_dict()
-    aid=st.selectbox('Investigar conta', accounts.account_id.tolist(),
+    aid=st.selectbox('Escolher conta para ver detalhes', accounts.account_id.tolist(),
                      format_func=lambda x: f'{names[x]} · {x}', key=key)
-    if st.button('Abrir Conta 360', key=key+'_open'):
+    if st.button('Abrir ficha do cliente', key=key+'_open'):
         st.session_state['requested_account_id']=aid
         st.switch_page('pages/01_Conta_360.py')

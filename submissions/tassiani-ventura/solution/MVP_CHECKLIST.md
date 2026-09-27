@@ -1,30 +1,32 @@
 # MVP_CHECKLIST — RavenStack Customer Journey
 
-**Última revisão:** 2026-09-27 08:34 (São Paulo). E2E Playwright e suíte Python completa passaram; resultado E2E em `docs/browser-results.json`.
+**Revisão:** 2026-09-27 09:02 (São Paulo). Interface simplificada e fluxo operacional validado em Python e navegador.
 
-| ID | Critério do blueprint | Status | Evidência confirmada |
+| ID | Critério de aceite | Status | Evidência |
 |---|---|---|---|
-| A01 | Criar cliente com conta, assinatura, owner e eventos | Concluído | Cadastro nativo persistiu, ficou validado e abriu Cliente 360 no E2E. |
-| A02 | Buscar/abrir Cliente 360 com estado, próxima ação e jornada | Concluído | Seleção e deep-link abertos pelo E2E; testes AppTest cobrem opções de contas. |
-| A03 | Operar legacy sem validação total | Concluído | Interação e follow-up persistidos numa legacy parcialmente validada. |
-| A04 | Validar apenas plano e seats no legacy | Concluído | E2E confirmou esses campos, conservou os demais sem validação. |
-| A05 | Interação aparece na jornada | Concluído | Interação operacional e evento de jornada gravados no E2E. |
-| A06 | Follow-up aparece em Meu Trabalho do responsável | Concluído | Tarefa atribuída ao ator QA percorreu o fluxo; AppTest/store cobrem ownership. |
-| A07 | Concluir tarefa, sair da fila e auditar | Concluído | Conclusão confirmada e evento de auditoria verificado no E2E. |
-| A08 | Prévia/alteração de subscription e evento | Concluído | E2E confirmou delta +300; teste de regressão cobre preview de linha paralela (+350). |
-| A09 | Perda total explícita muda lifecycle e registra impacto | Concluído | Movimento `total_loss` explícito confirmou lifecycle `churned` no E2E. |
-| A10 | Encerramento administrativo não causa churn indevido | Concluído | Encerrar uma linha preservou outra ativa e lifecycle `active` no E2E/unitário. |
-| A11 | Tratar alerta sem apagar histórico | Concluído | Alerta vencido marcado tratado e histórico preservado no E2E. |
-| A12 | Auditoria quem/quando/origem/antes/depois | Concluído | Evento de conclusão/movimentos e testes de store verificam ator e valores anteriores/novos. |
-| A13 | CSVs históricos protegidos | Concluído | SHA-256 antes/depois validado no teste do store; fontes ficam read-only. |
-| A14 | Sem promoção silenciosa de estado legacy | Concluído | Import idempotente e atualização somente dos campos confirmados; suíte/teste de domínio. |
-| A15 | Fluxo funciona sem depender de dashboard | Concluído | Home Meu Trabalho, 22 rotas e viewport mobile sem overflow no E2E. |
+| A01 | Criar cliente, assinatura, responsável e eventos | Concluído | Cadastro nativo criado e aberto na Ficha do cliente; Playwright. |
+| A02 | Encontrar ficha com estado, próxima ação e jornada | Concluído | Busca e navegação testadas; título/descrição orientados ao trabalho. |
+| A03 | Usar conta importada sem validação total | Concluído | Interação e próxima ação permitidas em conta parcialmente validada. |
+| A04 | Confirmar campos legacy seletivamente | Concluído | Plano e seats confirmados sem promover o restante. |
+| A05 | Registrar contato na jornada | Concluído | Contato/evento auditável persistidos. |
+| A06 | Atribuir próximo passo a responsável | Concluído | Tarefa aparece na fila do responsável. |
+| A07 | Concluir tarefa e auditar | Concluído | E2E confirmou saída da fila e evento. |
+| A08 | Alterar assinatura com prévia | Concluído | E2E delta +300; teste de inclusão paralela cobre +350. |
+| A09 | Registrar perda total confirmada | Concluído | Ação explícita altera etapa da relação, sem inferência histórica. |
+| A10 | Encerrar linha sem churn indevido | Concluído | Outra linha ativa mantém a conta ativa. |
+| A11 | Tratar alerta sem apagar histórico | Concluído | E2E confirmou tratamento e retenção do histórico. |
+| A12 | Auditar ator, data, origem e antes/depois | Concluído | Eventos transacionais e E2E de alteração/conclusão. |
+| A13 | Proteger CSVs históricos | Concluído | Hashes antes/depois nos testes; fontes read-only. |
+| A14 | Não promover legacy automaticamente | Concluído | Seed idempotente e confirmação explícita dos dados. |
+| A15 | Trabalhar sem depender de dashboard | Concluído | Home Minha fila; E2E das rotas e viewport mobile 390×844 sem overflow horizontal. |
 
-## Validações pendentes
+## Evidência final
 
-- Clone limpo e push/commit da branch; não foram feitos nesta sessão.
-- `pip check` e `git diff --check` passaram após as alterações finais.
+- Suíte completa: **88 passed in 207.54s**.
+- Testes focados de interface/navegação após os últimos rótulos: **33 passed in 171.75s**.
+- Playwright: exit 0; A01–A15, 20 rotas abertas e tela mobile verificada. Evidências em `docs/browser-results.json` e `docs/screenshots/`.
+- `compileall`, `pip check` e `git diff --check` passaram.
 
 ## Limitações reais
 
-SQLite demo não é persistência durável no Streamlit Community Cloud. Postgres implementado, sem instância para smoke de integração e sem migração/Alembic. Sem login/SSO/RBAC; ator/owner é texto autodeclarado. Dados sintéticos; não inserir PII. Histórico raw read-only; `churn_event` não confirma perda econômica.
+PostgreSQL está implementado, mas sem instância para integração; SQLite local não é persistência durável garantida no Streamlit Cloud. Sem SSO/RBAC; responsável/operador é autodeclarado. Não usar dados pessoais reais no demo. `churn_event` não comprova perda econômica.

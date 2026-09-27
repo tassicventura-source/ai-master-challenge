@@ -7,7 +7,7 @@ from src.explore import table
 setup_page(st, 'Visão executiva')
 st.title('O que exige atenção agora')
 st.write('Conecte o sinal do negócio à conta e à evidência que sustenta a decisão.')
-st.page_link('pages/08_Central_de_Retencao.py', label='Abrir Central de Retenção e registrar ações →')
+st.page_link('pages/08_Central_de_Retencao.py', label='Revisar um sinal histórico e registrar acompanhamento →')
 a=load_table('account_360'); life=load_table('lifecycle_events')
 active=life.paid_context_at_event.eq('paid_line_active').sum()
 c1,c2,c3=st.columns(3)
@@ -24,7 +24,6 @@ annual=a.assign(ano=a.signup_date.dt.year).groupby('ano').agg(contas=('account_i
 for year,r in annual.iterrows():
     st.write(f"**{year}:** {int(r.contas)} cadastros · {fmt_money(r.valor)} de valor inicial · {int(r.eventos)}/{int(r.elegiveis)} contas com evento nos primeiros 90 dias ({r.incidencia:.1%}).")
 st.caption('Valor inicial = soma do MRR das linhas não trial e positivas na primeira data paga. Não representa faturamento, caixa ou MRR atual. Eventos em 90 dias usam somente contas com janela completa.')
-st.page_link('pages/05_Growth_e_Comercial.py', label='Comparar origens e investigar contas →')
+st.page_link('pages/05_Growth_e_Comercial.py', label='Comparar origens e ver as contas →')
 with st.expander('Como interpretar os números'):
     st.write('Corte de observação: 31/12/2024, última data de evento registrada. A completude até essa data é uma premissa de análise do dataset. Reembolsos são valores informados na fonte, sem conciliação bancária. As bases são sintéticas; associações não demonstram causas.')
-    st.page_link('pages/07_Dados_e_Arquitetura.py',label='Ver qualidade e definições')

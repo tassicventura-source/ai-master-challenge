@@ -19,8 +19,8 @@ def assert_ok(at):
 def test_my_work_is_the_operational_home():
     at=AppTest.from_file(str(ROOT/'app.py'),default_timeout=30).run()
     assert_ok(at)
-    assert at.title[0].value=='Meu trabalho'
-    assert any(t.label=='Ações de sinais' for t in at.tabs)
+    assert at.title[0].value=='Minha fila'
+    assert any(t.label=='Acompanhamentos históricos' for t in at.tabs)
 
 
 def test_operator_identity_persists_across_multipage_navigation():
@@ -35,8 +35,8 @@ def test_operator_identity_persists_across_multipage_navigation():
 
 def test_retention_central_renders_prioritized_cases_and_action_fields():
     at=app('08_Central_de_Retencao.py')
-    assert at.title[0].value=='Central de Retenção'
-    assert any('Sinais para triagem' in m.label for m in at.metric)
+    assert at.title[0].value=='Revisar sinais históricos'
+    assert any('Registros antigos para revisar' in m.label for m in at.metric)
     assert any(w.label=='Responsável' for w in at.text_input)
     assert any(w.label=='Ação a executar' for w in at.text_area)
     assert any(w.label=='Prazo' for w in at.date_input)
@@ -45,9 +45,9 @@ def test_retention_central_renders_prioritized_cases_and_action_fields():
 
 def test_crm_workspace_exposes_registration_pipeline_and_activity_forms():
     at=app('09_Operacao_CRM.py')
-    assert at.title[0].value=='Comercial · pipeline e atuação'
-    assert any('Cadastrar lead' in t.label for t in at.tabs)
-    assert any('Pipeline' in t.label for t in at.tabs)
+    assert at.title[0].value=='Vendas e oportunidades'
+    assert any('Cadastrar oportunidade' in t.label for t in at.tabs)
+    assert any('Oportunidades' in t.label for t in at.tabs)
     assert_ok(at)
 
 @pytest.mark.parametrize('page',PAGES)
@@ -71,9 +71,11 @@ def test_every_route_and_widget_options(page):
 @pytest.mark.parametrize('page',['03_Produto.py','04_Suporte_e_CS.py','05_Growth_e_Comercial.py','06_Finance_RevOps.py'])
 def test_drilldown_preserves_account(page):
     at=app(page)
-    widget=next(w for w in at.selectbox if w.label=='Investigar conta')
+    widget=next(w for w in at.selectbox if w.label=='Escolher conta para ver detalhes')
     aid=widget.value
-    next(b for b in at.button if b.label=='Abrir Conta 360').click().run()
+    key={'03_Produto.py':'product_account_open','04_Suporte_e_CS.py':'support_account_open',
+         '05_Growth_e_Comercial.py':'growth_account_open','06_Finance_RevOps.py':'finance_account_open'}[page]
+    at.button(key=key).click().run()
     assert_ok(at)
     assert at.selectbox(key='operational_customer_picker').value==aid
 
@@ -88,9 +90,9 @@ def test_account_filters(page):
 
 def test_account_timeline_empty_and_anomalies():
     at=app('01_Conta_360.py')
-    assert at.title[0].value=='Cliente 360'
-    assert [t.label for t in at.tabs]==['Visão geral','Jornada','Assinatura & receita','Produto & suporte','Histórico / fonte']
-    assert any(w.label=='Buscar / selecionar cliente' for w in at.selectbox)
+    assert at.title[0].value=='Ficha do cliente'
+    assert [t.label for t in at.tabs]==['Resumo e próxima ação','Contatos e jornada','Contrato e receita','Produto e suporte','Dados de origem']
+    assert any(w.label=='Buscar um cliente para abrir a ficha' for w in at.selectbox)
     assert_ok(at)
 
 
@@ -110,7 +112,7 @@ def test_every_account_opens():
     for option in at.selectbox(key='operational_customer_picker').options:
         at.selectbox(key='operational_customer_picker').select(option).run()
         assert_ok(at)
-        assert any('Cliente 360' in x.value for x in at.title)
+        assert any('Ficha do cliente' in x.value for x in at.title)
 
 
 def test_journey_table_headers_match_content():

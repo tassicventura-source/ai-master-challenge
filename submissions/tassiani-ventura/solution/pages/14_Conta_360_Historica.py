@@ -9,10 +9,10 @@ from src.explore import CONTEXTS, account_filters, table
 from src.retention_ui import render_account_operations
 from src.ui import setup_page
 
-setup_page(st, "Conta 360")
-st.title("Conta 360 · histórico importado")
-st.warning("Esta página é a exploração analítica do conjunto sintético até 31/12/2024. Para operar a conta use a rota **Cliente 360**; o passado não é estado atual validado.")
-st.write("Sinais históricos, filtros, drill-down e registros legados preservados para investigação. Novas alterações canônicas são feitas na ficha operacional.")
+setup_page(st, "Ficha histórica da conta")
+st.title("Ficha histórica da conta · dados até 2024")
+st.warning("Esta página consulta registros históricos até 31/12/2024. Para atender o cliente hoje, use **Ficha do cliente**; dados antigos não confirmam o estado atual.")
+st.write("Consulta registros anteriores a 2025 e seus filtros. Para registrar atendimentos e mudanças atuais, use a Ficha do cliente.")
 accounts = load_table("account_360").sort_values(["account_name", "account_id"])
 crm_accounts = list_crm_accounts()
 crm_by_id = {row["account_id"]: row for row in crm_accounts}

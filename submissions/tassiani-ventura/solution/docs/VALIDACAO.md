@@ -1,28 +1,27 @@
 # Validação — RavenStack Customer Journey
 
-**Execução:** 2026-09-27 · Python 3.12 / Streamlit 1.64 · sandbox atual. A prévia Streamlit temporária está disponível no link compartilhado no handoff.
+**Execução:** 2026-09-27 · sandbox Python 3.12 / Streamlit 1.64.
 
-## E2E Playwright aprovado
+## Revisão de linguagem e navegação
 
-Comando: `RAVEN_PYTHON=python RAVEN_BROWSER_EXECUTABLE=/usr/bin/chromium npm run test:browser`.
+A navegação diária usa nomes orientados à tarefa: **Minha fila**, **Clientes**, **Ficha do cliente**, **Tarefas e alertas**, **Vendas e oportunidades**, **Prioridades da carteira** e **Acompanhamento da equipe**. **Consulta histórica (dados até 2024)** agrupa registros congelados; páginas técnicas de jornada e arquitetura ficam fora do menu diário. Filtros e estados operacionais são exibidos em português, mantendo valores internos compatíveis com o banco.
 
-Resultado: **exit 0**, cobrindo cadastro nativo e Cliente 360 (A01/A02), interação e follow-up atribuído (A05/A06), concluir tarefa com evento (A07), tratar alerta conservando histórico (A11), alteração de MRR com delta +300 (A08/A12), encerramento administrativo sem churn e perda total explicitamente confirmada (A09/A10), ação de sinal persistida, uso e validação parcial de conta legacy sem mudar fontes (A03/A04/A13/A14), 22 rotas e viewport **390×844 sem overflow horizontal** (A15). Evidência detalhada em `docs/browser-results.json`; capturas em `docs/screenshots/`.
+## Python e integridade
 
-O E2E revelou e levou à correção de um bug real: `preview_subscription_change` exigia ID de assinatura a substituir mesmo quando `create_parallel=True`. A prévia agora soma linhas vigentes e não confunde inclusão paralela com substituição; regressão dedicada cobre delta +350. Também ajustados flash após rerun e roteiro Playwright (menus React Aria, expander, viewport/hrefs mobile).
+- `python -m compileall -q app.py pages src scripts tests`: passou.
+- Suíte completa `python -m pytest -q -W error::DeprecationWarning`: **88 passed in 207.54s**.
+- Testes focados de interface/navegação após a revisão final: **33 passed in 171.75s**.
+- `python -m pip check`: sem dependências quebradas.
+- `git diff --check`: passou.
 
-## Testes Python
+## E2E
 
-- Suíte completa pós-correções: **88 passed em 212.36s**, com `-W error::DeprecationWarning`.
-- Após fix de assinatura paralela e lifecycle: **2 testes direcionados passaram**.
-- `python -m compileall -q app.py pages src scripts tests`, três AppTests, `pip check` e `git diff --check`: passaram após os fixes.
+Comando: `RAVEN_PYTHON=python RAVEN_BROWSER_EXECUTABLE=/usr/bin/chromium npm run test:browser` — **exit 0** após a revisão final dos rótulos.
 
-## Integridade e regras preservadas
+Cobertura: A01–A15; cadastro e Ficha do cliente, contatos, tarefa atribuída e concluída, alerta tratado e auditado, alteração e encerramento de contratos, uso legacy com validação parcial, ação ligada a evidência histórica; **20 rotas abertas** e viewport **390×844 sem overflow horizontal**. Evidência: `docs/browser-results.json`; capturas em `docs/screenshots/`.
 
-SQLAlchemy com SQLite local e suporte de configuração PostgreSQL. Seed idempotente de 500 registros legacy; campos/estado contratual só ficam atuais após confirmação operacional. Testes preservam SHA-256 das cinco fontes. `churn_event`, uso/ticket, refund informado e fechamento administrativo não são considerados por si só prova de churn ou perda econômica. Arquivos históricos permanecem read-only.
+## Integridade e limitações
 
-## Limitações
+SQLAlchemy suporta SQLite e configuração PostgreSQL; os CSVs permanecem somente leitura. Dados importados não são promovidos a contrato atual sem confirmação explícita. Nenhum sinal histórico, `churn_event`, ticket, erro, refund informado ou encerramento administrativo prova sozinho churn ou perda econômica.
 
-- Sem instância/credenciais Postgres para teste de integração; não há Alembic nem migração automática dos bancos SQLite antigos.
-- SQLite local persiste enquanto o arquivo existe, mas pode desaparecer/não ser compartilhado no Streamlit Community Cloud; usar Postgres gerenciado nos Secrets (`DATABASE_URL`) para dados duráveis.
-- Não há autenticação/SSO/RBAC; ator e responsável são autodeclarados. Não usar PII em deployment público.
-- Preview desta sessão é temporária, sem promessa de permanência após encerramento do sandbox. Push/clone limpo ainda pendentes.
+Não há instância para teste de integração PostgreSQL, Alembic ou migração automática do SQLite antigo. SQLite demo não é persistência durável garantida no Streamlit Community Cloud. Sem SSO/RBAC; nomes de operador/responsável são autodeclarados.

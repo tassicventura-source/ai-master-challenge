@@ -20,6 +20,19 @@ from src.operating_store import (
 )
 from src.ui import setup_page
 
+TASK_STATUS_PT = {"open": "Aberta", "in_progress": "Em andamento", "completed": "Concluída", "cancelled": "Cancelada"}
+LIFECYCLE_PT = {"onboarding": "Implantação", "active": "Ativa", "paused": "Pausada", "churned": "Encerrada"}
+SUBSCRIPTION_STATUS_PT = {"active": "Ativa", "paused": "Pausada", "ended": "Encerrada"}
+HEALTH_PT = {"normal": "Normal", "atenção": "Atenção", "crítica": "Crítica", "unknown": "Não informada"}
+VERIFICATION_PT = {"not_validated": "Não validada", "partially_validated": "Validada em parte", "validated": "Validada", "conflict": "Conflito a revisar"}
+ORIGIN_PT = {"legacy": "Importada (histórico)", "native": "Cadastrada agora"}
+ALERT_STATUS_PT = {"open": "Aberto", "treated": "Tratado", "resolved": "Resolvido"}
+ALERT_SEVERITY_PT = {"info": "Informativo", "low": "Baixa", "medium": "Média", "warning": "Atenção", "high": "Alta", "critical": "Crítica", "urgent": "Urgente"}
+
+
+def _label(value: str | None, labels: dict[str, str]) -> str:
+    return labels.get(str(value), str(value or "Não informado"))
+
 
 def _actor() -> str:
     return str(st.session_state.get("actor_identity") or st.session_state.get("current_actor_input") or "Operador local").strip() or "Operador local"
@@ -66,11 +79,11 @@ def _signal_action_card(action: dict, prefix: str) -> None:
     bucket = "VENCIDA" if due < date.today() else "HOJE" if due == date.today() else "PRÓXIMA"
     with st.container(border=True):
         st.markdown(f"**{bucket} · {action['action_text']}**")
-        st.caption(f"{action['account_name']} · {action['area']} · {action['owner']} · prazo {due:%d/%m/%Y} · {action['priority']} · {action['status']}")
+        st.caption(f"{action['account_name']} · {action['area']} · {action['owner']} · prazo {due:%d/%m/%Y} · {action['priority']} · {_label(action['status'], {'Aberta':'Aberta','Em andamento':'Em andamento','Concluída':'Concluída','Cancelada':'Cancelada'})}")
         st.write(action["title"])
         if action.get("observation"):
             st.caption(f"Observação: {action['observation']}")
-        if st.button("Abrir sinal e atualizar ação", key=f"{prefix}_signal_{action['action_id']}"):
+        if st.button("Ver evidência e atualizar acompanhamento", key=f"{prefix}_signal_{action['action_id']}"):
             st.session_state["requested_signal_id"] = action["signal_id"]
             st.switch_page("pages/08_Central_de_Retencao.py")
 
@@ -90,7 +103,7 @@ def _task_card(task: dict, *, prefix: str, allow_edit: bool = False) -> None:
                 owner = st.text_input("Responsável", value=task["owner"])
                 due_date = st.date_input("Prazo", value=due)
                 priority = st.selectbox("Prioridade", TASK_PRIORITIES, index=TASK_PRIORITIES.index(task["priority"]))
-                status = st.selectbox("Status", TASK_STATUSES, index=TASK_STATUSES.index(task["status"]))
+                status = st.selectbox("Andamento", TASK_STATUSES, format_func=lambda x: _label(x, TASK_STATUS_PT), index=TASK_STATUSES.index(task["status"]))
                 note = st.text_area("Resultado / observação de conclusão", value=task.get("completion_note") or "")
                 saved = st.form_submit_button("Salvar", type="primary")
             if saved:
@@ -121,7 +134,7 @@ def _alert_card(alert: dict, *, prefix: str) -> None:
     with st.container(border=True):
         st.markdown(f"**{alert['customer_name']} · {alert['alert_type'].replace('_', ' ').title()}**")
         st.write(alert["reason"])
-        st.caption(f"{alert['severity'].upper()} · status {alert['status']} · criada {str(alert['created_at'])[:10]}")
+        st.caption(f"Prioridade {_label(alert['severity'], ALERT_SEVERITY_PT)} · situação: {_label(alert['status'], ALERT_STATUS_PT)} · criada {str(alert['created_at'])[:10]}")
         c1, c2 = st.columns([1, 1])
         if c1.button("Abrir cliente", key=f"{prefix}_alert_open_{alert['alert_id']}"):
             _open_customer(alert["customer_id"])
@@ -141,9 +154,9 @@ def _alert_card(alert: dict, *, prefix: str) -> None:
 
 
 def render_my_work() -> None:
-    setup_page(st, "Meu Trabalho", "◈")
-    st.title("Meu trabalho")
-    st.caption(f"Operador da sessão: {_actor()} · autoria MVP autodeclarada, sem login/SSO.")
+    setup_page(st, "Minha fila", "◈")
+    st.title("Minha fila")
+    st.caption(f"Seus próximos compromissos: tarefas, clientes que precisam de contato e alertas atribuídos a você. Operador: {_actor()} (nome informado nesta sessão).")
     _flash()
     try:
         queue = work_queue(actor=_actor())
@@ -160,7 +173,7 @@ def render_my_work() -> None:
     c4.metric("Alertas abertos", len(queue["alerts"]))
 
     today_tab, overdue_tab, renewal_tab, alert_tab, signal_tab = st.tabs(
-        ["Hoje", "Vencidas", "Renovações", "Alertas", "Ações de sinais"],
+        ["Hoje", "Atrasadas", "Renovações", "Alertas", "Acompanhamentos históricos"],
         key="my_work_tabs", on_change="rerun")
     with today_tab:
         rows = queue["today"] + [x for x in queue["upcoming"] if x["due_date"] == date.today()]
@@ -174,7 +187,7 @@ def render_my_work() -> None:
                 _task_card(item, prefix="upcoming")
         due_signal_actions = [x for x in signal_actions if x["due_date"] >= date.today().isoformat()]
         if due_signal_actions:
-            st.subheader("Ações da Central de Retenção")
+            st.subheader("Acompanhamentos de registros históricos")
             for item in due_signal_actions:
                 _signal_action_card(item, "today_signal")
     with overdue_tab:
@@ -200,7 +213,7 @@ def render_my_work() -> None:
             _alert_card(alert, prefix="work")
     with signal_tab:
         if not signal_actions:
-            st.info("Nenhuma ação de sinal aberta atribuída a você. Ações por evidência histórica podem ser atribuídas na Central de Retenção.")
+            st.info("Você não tem acompanhamentos históricos em aberto. Para revisar um registro antigo e criar um, abra **Revisar sinais históricos**.")
         for item in sorted(signal_actions, key=lambda x: (x["due_date"], x["priority"])):
             _signal_action_card(item, "all_signal")
 
@@ -208,16 +221,17 @@ def render_my_work() -> None:
 def render_customers_page() -> None:
     setup_page(st, "Clientes", "◈")
     st.title("Clientes")
+    st.caption("Encontre uma conta existente ou cadastre um cliente. Abra a ficha para registrar contatos, atualizar dados confirmados e definir quem fará o próximo passo e quando.")
     _flash()
     customers_all = list_customers()
     with st.expander("Buscar e filtrar clientes", expanded=True):
         query = st.text_input("Buscar cliente ou ID", key="customers_search")
         f1, f2, f3, f4 = st.columns(4)
-        lifecycle = f1.selectbox("Lifecycle", ["Todos", *LIFECYCLES], key="customers_lifecycle")
+        lifecycle = f1.selectbox("Etapa da relação", ["Todos", *LIFECYCLES], format_func=lambda x: _label(x, LIFECYCLE_PT) if x != "Todos" else x, key="customers_lifecycle")
         owners = ["Todos", *sorted({x["owner"] for x in customers_all if x["owner"]})]
         owner = f2.selectbox("Responsável", owners, key="customers_owner")
-        verification = f3.selectbox("Validação", ["Todos", "not_validated", "partially_validated", "validated", "conflict"], key="customers_verification")
-        origin = f4.selectbox("Origem", ["Todos", "legacy", "native"], key="customers_origin")
+        verification = f3.selectbox("Confirmação dos dados", ["Todos", "not_validated", "partially_validated", "validated", "conflict"], format_func=lambda x: _label(x, VERIFICATION_PT) if x != "Todos" else x, key="customers_verification")
+        origin = f4.selectbox("Origem do cadastro", ["Todos", "legacy", "native"], format_func=lambda x: _label(x, ORIGIN_PT) if x != "Todos" else x, key="customers_origin")
     visible = list_customers(query=query, lifecycle=lifecycle, owner=owner,
                              verification=verification, origin=origin)
     st.caption(f"{len(visible)} cliente(s) neste recorte · {sum(x['origin']=='legacy' for x in visible)} históricos · {sum(x['origin']=='native' for x in visible)} nativos")
@@ -269,9 +283,9 @@ def render_customers_page() -> None:
             st.info("Nenhum cliente encontrado. Ajuste os filtros ou cadastre um novo.")
         else:
             frame = pd.DataFrame([{
-                "Cliente": x["name"], "ID": x["customer_id"], "Origem": x["origin"],
-                "Lifecycle": x["lifecycle_status"] or "Não validado",
-                "Validação": x["verification_status"], "Plano": x["plan_tier"] or "Não validado",
+                "Cliente": x["name"], "ID": x["customer_id"], "Origem": _label(x["origin"], ORIGIN_PT),
+                "Etapa atual": _label(x["lifecycle_status"], LIFECYCLE_PT),
+                "Dados confirmados": _label(x["verification_status"], VERIFICATION_PT), "Plano": x["plan_tier"] or "Não validado",
                 "Seats": x["seats"] if x["seats"] is not None else "Não validado",
                 "MRR atual": _money(x["mrr_current"], x["currency"]), "Responsável": x["owner"] or "Não atribuído",
                 "Próxima renovação": x["renewal_date"].strftime("%d/%m/%Y") if x["renewal_date"] else "Não validada",
@@ -280,7 +294,7 @@ def render_customers_page() -> None:
             options, labels = _customer_options(visible)
             selected = st.selectbox("Cliente para abrir", options,
                                     format_func=lambda x: labels[x], key="customer_open_picker")
-            if st.button("Abrir Cliente 360", key="customer_open_360", type="primary"):
+            if st.button("Abrir ficha do cliente", key="customer_open_360", type="primary"):
                 _open_customer(selected)
 
 
@@ -338,8 +352,8 @@ def _render_validate_legacy(customer: dict) -> None:
             picks["owner"] = c1.text_input("Responsável confirmado", value=customer["owner"] or "", key=f"v_owner_value_{cid}")
         if life_known:
             current = customer["lifecycle_status"] if customer["lifecycle_status"] in LIFECYCLES else LIFECYCLES[1]
-            picks["lifecycle_status"] = c2.selectbox("Lifecycle atual confirmado", LIFECYCLES,
-                index=LIFECYCLES.index(current), key=f"v_lifecycle_{cid}")
+            picks["lifecycle_status"] = c2.selectbox("Etapa da relação confirmada", LIFECYCLES,
+                format_func=lambda x: _label(x, LIFECYCLE_PT), index=LIFECYCLES.index(current), key=f"v_lifecycle_{cid}")
         if health_known:
             current = customer["health_status"] if customer["health_status"] in HEALTH_STATES else HEALTH_STATES[0]
             picks["health_status"] = c3.selectbox("Saúde observada", HEALTH_STATES,
@@ -361,8 +375,8 @@ def _render_validate_legacy(customer: dict) -> None:
             picks["billing_frequency"] = x2.selectbox("Billing confirmado", BILLING_FREQUENCIES, index=BILLING_FREQUENCIES.index(current), key=f"v_bill_value_{cid}")
         if renewal_known:
             picks["renewal_date"] = x3.date_input("Próxima renovação confirmada", value=customer["renewal_date"] or date.today(), key=f"v_renewal_value_{cid}")
-        status = st.selectbox("Status contratual (opcional, validar só se conhecido)",
-                              ["Não confirmar", "active", "paused", "ended"], key=f"v_sub_status_{cid}")
+        status = st.selectbox("Situação do contrato (opcional, confirme só se souber)",
+                              ["Não confirmar", "active", "paused", "ended"], format_func=lambda x: _label(x, SUBSCRIPTION_STATUS_PT) if x != "Não confirmar" else x, key=f"v_sub_status_{cid}")
         if status != "Não confirmar":
             picks["subscription_status"] = status
         mark_conflict = st.checkbox("Sinalizar conflito observado entre fontes (não escolhido acima)", key=f"v_conflict_{cid}")
@@ -508,16 +522,16 @@ def _render_movement(customer: dict) -> None:
             subscription_id=sub_id, reactivation_mrr=float(react_mrr) if react_mrr is not None else None,
             currency=currency)
         economic = "impacto MRR não validado/não comparável" if not preview["economic_impact_known"] else f"MRR {_money(preview['mrr_before'], preview['currency'])} → {_money(preview['mrr_after'], preview['currency'])} (delta {preview['mrr_delta']:+,.2f})"
-        st.info(f"Prévia antes de confirmar: {preview['lifecycle_before'] or 'não validado'} → {preview['lifecycle_after']} · assinaturas vigentes {preview['active_subscription_count_before']} → {preview['active_subscription_count_after']} · {economic}")
+        st.info(f"Antes da confirmação: {_label(preview['lifecycle_before'], LIFECYCLE_PT)} → {_label(preview['lifecycle_after'], LIFECYCLE_PT)} · contratos ativos {preview['active_subscription_count_before']} → {preview['active_subscription_count_after']} · {economic}")
     except ValueError as exc:
         st.warning(str(exc))
     if movement == "total_loss":
-        st.warning("Este comando encerra explicitamente todas as assinaturas operacionais e marca a conta como churned. Eventos históricos de churn não acionam esta mudança.")
+        st.warning("Só escolha esta opção se o cliente confirmou que encerrou todos os contratos. Ela marca a conta como encerrada; um evento antigo de cancelamento não faz isso automaticamente.")
         confirm_loss = st.checkbox("Confirmo a perda total verificada com o cliente/sistema oficial", key=f"confirm_total_loss_{customer['customer_id']}")
     else:
         confirm_loss = True
     if movement == "admin_end":
-        st.caption("Encerrar uma linha administrativa não altera lifecycle para churned; outra subscription vigente mantém a conta ativa.")
+        st.caption("Isto encerra apenas a linha selecionada. Se outro contrato continuar ativo, a conta permanece ativa.")
     if st.button("Confirmar movimento", key=f"save_movement_{customer['customer_id']}", type="primary", disabled=not confirm_loss):
         try:
             result = record_lifecycle_movement(customer["customer_id"], movement=movement,
@@ -526,15 +540,17 @@ def _render_movement(customer: dict) -> None:
                 reactivation_mrr=float(react_mrr) if react_mrr is not None else None,
                 currency=currency, billing_frequency=billing, renewal_date=renewal_date)
             delta_text = "não calculado" if result["mrr_delta"] is None else f"{result['mrr_delta']:+,.2f}"
-            st.session_state["operational_flash"] = f"Movimento {movement} registrado. Lifecycle: {result['lifecycle_status'] or 'não alterado'}; delta MRR {delta_text}"
+            movement_label = {"renewal":"Renovação", "pause":"Pausa", "total_loss":"Encerramento confirmado", "reactivation":"Reativação", "admin_end":"Encerramento administrativo de uma linha"}[movement]
+            st.session_state["operational_flash"] = f"Mudança registrada: {movement_label}. Situação da relação: {_label(result['lifecycle_status'], LIFECYCLE_PT)}; variação de MRR {delta_text}"
             st.rerun()
         except ValueError as exc:
             st.error(str(exc))
 
 
 def render_customer_360() -> None:
-    setup_page(st, "Cliente 360", "◈")
-    st.title("Cliente 360")
+    setup_page(st, "Ficha do cliente", "◈")
+    st.title("Ficha do cliente")
+    st.caption("Registro de trabalho da conta: veja o contexto, registre contatos, confira contrato/receita informados e consulte o histórico. Atualize somente o que foi confirmado.")
     _flash()
     items = list_customers()
     if not items:
@@ -548,7 +564,7 @@ def render_customer_360() -> None:
     options, labels = _customer_options(items)
     current = st.session_state.get("operational_customer_id")
     idx = options.index(current) if current in options else 0
-    selected = st.selectbox("Buscar / selecionar cliente", options,
+    selected = st.selectbox("Buscar um cliente para abrir a ficha", options,
                             format_func=lambda x: labels[x], index=idx,
                             key="operational_customer_picker")
     st.session_state["operational_customer_id"] = selected
@@ -558,7 +574,7 @@ def render_customer_360() -> None:
         st.error("Cliente não encontrado.")
         return
     _render_customer_header(customer)
-    tabs = st.tabs(["Visão geral", "Jornada", "Assinatura & receita", "Produto & suporte", "Histórico / fonte"],
+    tabs = st.tabs(["Resumo e próxima ação", "Contatos e jornada", "Contrato e receita", "Produto e suporte", "Dados de origem"],
                    key=f"customer_360_tabs_{selected}", on_change="rerun")
     with tabs[0]:
         left, right = st.columns([1.2, 1])
@@ -567,12 +583,12 @@ def render_customer_360() -> None:
             open_tasks = [x for x in list_tasks(customer_id=selected) if x["status"] in ("open", "in_progress")]
             if open_tasks:
                 first = min(open_tasks, key=lambda x: (x["due_date"], x["priority"]))
-                st.info(f"{first['title']} · {first['due_date']:%d/%m/%Y} · {first['owner']} · {first['status']}")
+                st.info(f"{first['title']} · {first['due_date']:%d/%m/%Y} · {first['owner']} · {_label(first['status'], TASK_STATUS_PT)}")
             else:
                 st.warning("Sem próxima ação aberta.")
             st.subheader("Contexto atual")
             st.write(f"Responsável: **{customer['owner'] or 'não atribuído'}**")
-            st.write(f"Lifecycle: **{customer['lifecycle_status'] or 'não validado'}** · saúde: **{customer['health_status'] or 'não informada'}**")
+            st.write(f"Etapa da relação: **{_label(customer['lifecycle_status'], LIFECYCLE_PT)}** · saúde informada: **{_label(customer['health_status'], HEALTH_PT)}**")
             st.write(f"Plano/seats: **{customer['plan_tier'] or 'não validado'}** · **{customer['seats'] if customer['seats'] is not None else 'não validados'}**")
             st.write(f"MRR atual: **{_money(customer['mrr_current'], customer['currency'])}** · renovação: **{customer['renewal_date'].strftime('%d/%m/%Y') if customer['renewal_date'] else 'não validada'}**")
         with right:
@@ -604,7 +620,7 @@ def render_customer_360() -> None:
                         st.caption(f"{event['event_at']} UTC · {event['event_type']}")
                         st.json(json.loads(event["changed_fields_json"]), expanded=False)
     with tabs[1]:
-        st.subheader("Jornada do cliente")
+        st.subheader("Contatos, tarefas e mudanças registrados")
         events = list_events(selected)
         if not events:
             st.info("A jornada recebe automaticamente cadastro, validações, tarefas, interações e movimentos.")
@@ -618,14 +634,14 @@ def render_customer_360() -> None:
                 with st.expander("Antes / depois"):
                     st.json({"antes": event["previous_value"], "depois": event["new_value"]}, expanded=False)
     with tabs[2]:
-        st.subheader("Assinaturas operacionais")
+        st.subheader("Contrato atual registrado pela equipe")
         subs = list_subscriptions(selected)
         if not subs:
             st.info("Nenhuma assinatura operacional. Linhas do arquivo histórico abaixo não são o contrato atual.")
         for sub in subs:
             with st.container(border=True):
                 confirmed = set(json.loads(sub["confirmed_fields_json"] or "[]"))
-                st.markdown(f"**{sub['plan_tier'] or 'Plano não validado'} · {sub['status']} · {sub['verification_status']}**")
+                st.markdown(f"**{sub['plan_tier'] or 'Plano não validado'} · {_label(sub['status'], SUBSCRIPTION_STATUS_PT)} · {_label(sub['verification_status'], VERIFICATION_PT)}**")
                 st.write(f"Seats: {sub['seats'] if 'seats' in confirmed else 'não validados'} · MRR: {_money(sub['mrr_current'] if 'mrr_current' in confirmed else None, sub['currency'])} · renovação: {sub['renewal_date'] if 'renewal_date' in confirmed else 'não validada'}")
                 st.caption(f"Vigência {sub['effective_from'] or 'não informada'} → {sub['effective_to'] or 'vigente/sem fim'} · origem {sub['source']} · movimento {sub['movement_type']}")
         if customer["origin"] == "legacy":
@@ -634,10 +650,10 @@ def render_customer_360() -> None:
         st.divider()
         st.subheader("Alterar assinatura — prévia antes de confirmar")
         _render_subscription_change(customer)
-        st.subheader("Registrar movimento de ciclo de vida")
+        st.subheader("Registrar mudança confirmada no contrato")
         _render_movement(customer)
     with tabs[3]:
-        st.subheader("Interações registradas no sistema")
+        st.subheader("Registros históricos de produto e suporte")
         current_interactions = list_interactions(selected)
         if not current_interactions:
             st.caption("Sem interações operacionais ainda.")
@@ -660,7 +676,7 @@ def render_customer_360() -> None:
                     st.caption("Nenhum registro nesta fonte para a conta.")
     with tabs[4]:
         st.subheader("Fonte e qualidade dos dados")
-        st.write(f"Origem operacional: **{customer['origin']}** · validação: **{customer['verification_status']}**")
+        st.write(f"Origem: **{_label(customer['origin'], ORIGIN_PT)}** · confirmação dos dados: **{_label(customer['verification_status'], VERIFICATION_PT)}**")
         st.write(f"Campos com confirmação explícita: {', '.join(sorted(customer['verification_fields'])) or 'nenhum'}")
         if customer["origin"] == "legacy":
             st.warning("Conta importada. Plano, seats, trial, churn e MRR dos CSVs não são usados como estado atual automaticamente.")
@@ -679,29 +695,30 @@ def render_customer_360() -> None:
 def _render_customer_header(customer: dict) -> None:
     c1, c2, c3 = st.columns([2, 1, 1])
     c1.subheader(customer["name"])
-    c1.caption(f"{customer['industry'] or 'Setor não informado'} · {customer['country'] or 'País não informado'} · {customer['customer_id']}")
-    c2.metric("Lifecycle", customer["lifecycle_status"] or "Não validado")
-    c3.metric("Validação", customer["verification_status"].replace("_", " "))
+    c1.caption(f"{customer['industry'] or 'Setor não informado'} · {customer['country'] or 'País não informado'} · código {customer['customer_id']}")
+    c2.metric("Etapa da relação", _label(customer["lifecycle_status"], LIFECYCLE_PT))
+    c3.metric("Dados confirmados", _label(customer["verification_status"], VERIFICATION_PT))
     if customer["origin"] == "legacy" and customer["verification_status"] != "validated":
         st.warning("Dados importados / não validados. A ficha pode ser usada normalmente; confirme campos individuais quando disponíveis.")
     elif customer["origin"] == "native":
         st.caption("Cliente nativo · dados iniciais informados ao criar e validados no sistema.")
-    st.caption(f"Owner: {customer['owner'] or 'não atribuído'} · etapa: {customer['sales_stage'] or 'não informada'} · MRR atual: {_money(customer['mrr_current'], customer['currency'])}")
+    st.caption(f"Responsável: {customer['owner'] or 'não atribuído'} · etapa comercial: {customer['sales_stage'] or 'não informada'} · MRR atual: {_money(customer['mrr_current'], customer['currency'])}")
 
 
 def render_tasks_page() -> None:
-    setup_page(st, "Tarefas & Alertas", "◈")
-    st.title("Tarefas & alertas")
+    setup_page(st, "Tarefas e alertas", "◈")
+    st.title("Tarefas e alertas")
+    st.caption("Use esta página para criar uma tarefa avulsa, mudar responsável/prazo e concluir o trabalho. Alertas são itens que o sistema pede para conferir; marcar tratado não apaga o registro.")
     _flash()
     all_customers = list_customers()
     owners = ["Todos", *sorted({x["owner"] for x in all_customers if x["owner"]})]
     c1, c2, c3 = st.columns(3)
-    owner = c1.selectbox("Responsável", owners, key="tasks_owner")
-    status = c2.selectbox("Status", ["open", "in_progress", "completed", "cancelled", "Todos"], key="tasks_status")
-    scope = c3.selectbox("Fila", ["Todas", "Vencidas", "Próximas", "Histórico"], key="tasks_scope")
+    owner = c1.selectbox("Responsável pela tarefa", owners, key="tasks_owner")
+    status = c2.selectbox("Andamento da tarefa", [*TASK_STATUSES, "Todos"], format_func=lambda x: _label(x, TASK_STATUS_PT) if x != "Todos" else x, key="tasks_status")
+    scope = c3.selectbox("Quando vence", ["Todas", "Atrasadas", "Próximas", "Histórico"], key="tasks_scope")
     tasks = list_tasks(owner=owner, status=status)
     today = date.today()
-    if scope == "Vencidas":
+    if scope == "Atrasadas":
         tasks = [x for x in tasks if x["status"] in ("open", "in_progress") and x["due_date"] < today]
     elif scope == "Próximas":
         tasks = [x for x in tasks if x["status"] in ("open", "in_progress") and x["due_date"] >= today]
@@ -736,7 +753,7 @@ def render_tasks_page() -> None:
         for item in tasks:
             _task_card(item | {"customer_name": names.get(item["customer_id"], item["customer_id"])}, prefix="tasks")
     with alert_tab:
-        alert_status = st.selectbox("Status do alerta", ["open", "treated", "resolved", "Todos"], key="alert_status_filter")
+        alert_status = st.selectbox("Situação do alerta", ["open", "treated", "resolved", "Todos"], format_func=lambda x: _label(x, ALERT_STATUS_PT) if x != "Todos" else x, key="alert_status_filter")
         alerts = list_alerts(status=alert_status)
         if not alerts:
             st.info("Nenhum alerta neste filtro.")
@@ -745,9 +762,9 @@ def render_tasks_page() -> None:
 
 
 def render_intelligence_page() -> None:
-    setup_page(st, "Inteligência", "◈")
-    st.title("Inteligência acionável")
-    st.caption("Regras operacionais determinísticas em primeiro plano; sinais históricos continuam rotulados pela fonte e pelo cutoff.")
+    setup_page(st, "Prioridades da carteira", "◈")
+    st.title("Prioridades da carteira")
+    st.caption("Use para decidir qual conta atender primeiro. A lista mostra pendências atuais e, separadamente, fatos históricos que merecem conferência. Não calcula probabilidade de cancelamento.")
     try:
         queue = work_queue()
     except Exception as exc:
@@ -760,7 +777,7 @@ def render_intelligence_page() -> None:
         _alert_card(alert, prefix="intelligence")
     st.subheader("Dados atuais a validar")
     legacy = [x for x in list_customers(origin="legacy") if x["verification_status"] != "validated"]
-    st.caption(f"{len(legacy)} contas históricas ainda sem validação completa. Ausência de dados não significa saúde ou risco.")
+    st.caption(f"{len(legacy)} contas importadas ainda precisam ter os dados atuais conferidos. Ausência de informação não significa problema nem saúde confirmados.")
     if legacy:
         frame = pd.DataFrame([{"Conta": x["name"], "ID": x["customer_id"],
                                "Validação": x["verification_status"], "Owner": x["owner"] or "Não atribuído"}
@@ -768,7 +785,7 @@ def render_intelligence_page() -> None:
         st.dataframe(frame, hide_index=True, width="stretch")
         options, labels = _customer_options(legacy)
         selected = st.selectbox("Legacy para validar", options, format_func=lambda x: labels[x], key="intelligence_legacy_picker")
-        _customer_button(selected, "intelligence_open_legacy", "Abrir e validar Cliente 360")
+        _customer_button(selected, "intelligence_open_legacy", "Abrir ficha para conferir os dados")
     st.subheader("Triagem analítica histórica — cutoff 31/12/2024")
     st.warning("Esses sinais são evidência histórica congelada; não são alertas atuais nem health score. churn_event, refund registrado, erro e ausência de uso não provam churn nem perda econômica.")
     try:
@@ -796,9 +813,9 @@ def render_intelligence_page() -> None:
 
 
 def render_management_page() -> None:
-    setup_page(st, "Gestão", "◈")
-    st.title("Gestão da operação")
-    st.caption("Visão curta para conduzir fila e cobertura da carteira; não é painel de receita realizada.")
+    setup_page(st, "Acompanhamento da equipe", "◈")
+    st.title("Acompanhamento da equipe")
+    st.caption("Para quem coordena o time: veja tarefas atrasadas, clientes ativos sem próximo passo e a distribuição das pendências por responsável. Use para redistribuir trabalho e cobrar acompanhamento; não é painel de receita.")
     summary = management_summary()
     counts = summary["counts"]
     signal_actions = list_signal_actions()
@@ -826,7 +843,7 @@ def render_management_page() -> None:
                 "Concluídas": sum(x["status"] == "Concluída" for x in own)})
         st.dataframe(pd.DataFrame(owner_rows), hide_index=True, width="stretch")
     else:
-        st.caption("Ainda não há ações da Central de Retenção histórica registradas.")
+        st.caption("Ainda não há acompanhamentos de registros históricos atribuídos.")
     st.subheader("Tarefas vencidas por responsável")
     if counts["overdue_by_owner"]:
         st.dataframe(pd.DataFrame([{"Responsável": k, "Vencidas": v} for k, v in sorted(counts["overdue_by_owner"].items())]), hide_index=True, width="stretch")
@@ -842,7 +859,7 @@ def render_management_page() -> None:
         st.success("Todos os clientes de lifecycle ativo têm tarefa aberta.")
     st.subheader("Contas legacy e validação")
     verification = counts["legacy_by_verification"]
-    st.dataframe(pd.DataFrame([{"Estado de validação": k, "Contas": v} for k, v in sorted(verification.items())]), hide_index=True, width="stretch")
+    st.dataframe(pd.DataFrame([{"Confirmação dos dados": _label(k, VERIFICATION_PT), "Contas": v} for k, v in sorted(verification.items())]), hide_index=True, width="stretch")
     st.caption("Clientes nativos e legacy não são misturados; campos legacy atuais são desconhecidos até validação humana.")
     st.subheader("Movimentos econômicos explicitamente registrados")
     if summary["confirmed_movements"]:
@@ -898,8 +915,8 @@ def render_operational_shell() -> None:
 
 
 def render_sales_workspace() -> None:
-    setup_page(st, "Comercial · Pipeline", "◈")
-    st.title("Comercial · pipeline e atuação")
+    setup_page(st, "Vendas e oportunidades", "◈")
+    st.title("Vendas e oportunidades")
     st.caption("Aqui o time cadastra leads, atualiza etapa/owner e registra cada conversa. Valor de oportunidade é estimativa, não receita ou MRR.")
     _flash()
     all_items = list_customers()
@@ -907,10 +924,10 @@ def render_sales_workspace() -> None:
               "Fechado ganho", "Fechado perdido", "Onboarding", "Ativo", "Renovação", "Encerrado"]
     stage_items = [x for x in all_items if x["sales_stage"] in stages]
     c1, c2, c3 = st.columns(3)
-    c1.metric("Oportunidades no pipeline", len([x for x in stage_items if x["sales_stage"] not in ("Fechado ganho", "Fechado perdido", "Encerrado")]))
+    c1.metric("Oportunidades em andamento", len([x for x in stage_items if x["sales_stage"] not in ("Fechado ganho", "Fechado perdido", "Encerrado")]))
     c2.metric("Follow-ups abertos", sum(1 for x in list_tasks() if x["status"] in ("open", "in_progress")))
     c3.metric("Interações registradas", sum(len(list_interactions(x["customer_id"])) for x in stage_items[:150]))
-    register, pipeline, activities = st.tabs(["+ Cadastrar lead", "Pipeline", "Atividades"],
+    register, pipeline, activities = st.tabs(["+ Cadastrar oportunidade", "Oportunidades", "Atividades"],
                                              key="sales_workspace_tabs", on_change="rerun")
     with register:
         with st.form("opportunity_form", clear_on_submit=True):
@@ -941,12 +958,12 @@ def render_sales_workspace() -> None:
                     opportunity_currency=currency, expected_close_date=close_date,
                     next_action=next_title, next_action_due=next_due if next_title.strip() else None,
                     next_action_priority=next_priority, notes=notes)
-                st.session_state["operational_flash"] = "Oportunidade cadastrada no pipeline; lifecycle e assinatura permanecem não confirmados até fechamento/cadastro do cliente."
+                st.session_state["operational_flash"] = "Oportunidade cadastrada; a venda só conta como cliente e receita após confirmação e cadastro."
                 _open_customer(identity)
             except ValueError as exc:
                 st.error(str(exc))
     with pipeline:
-        with st.expander("Filtrar pipeline", expanded=True):
+        with st.expander("Filtrar oportunidades", expanded=True):
             f1, f2, f3 = st.columns(3)
             stage_filter = f1.selectbox("Etapa", ["Todas", *stages], key="sales_stage_filter")
             owners = ["Todos", *sorted({x["owner"] for x in stage_items if x["owner"]})]
@@ -956,7 +973,7 @@ def render_sales_workspace() -> None:
                                database_url=None)
         items = [x for x in items if x["sales_stage"] in stages and (stage_filter == "Todas" or x["sales_stage"] == stage_filter)]
         if not items:
-            st.info("Pipeline vazio neste filtro. Use **Cadastrar lead** para registrar uma oportunidade.")
+            st.info("Nenhuma oportunidade neste filtro. Use **Cadastrar oportunidade** para registrar uma nova venda em andamento.")
         else:
             frame = pd.DataFrame([{
                 "Empresa": x["name"], "Etapa": x["sales_stage"], "Responsável": x["owner"] or "Não atribuído",
