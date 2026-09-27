@@ -1,26 +1,23 @@
 # HANDOFF — RavenStack Customer Journey
 
-**Atualizado:** 2026-09-27 09:02 (São Paulo). Repositório: `/home/ubuntu/work/github/ai-master-challenge`; branch `submission/tassiani-ventura`; projeto em `submissions/tassiani-ventura/solution`.
+**Atualizado:** 2026-09-27 09:04 (São Paulo). Repositório `tassicventura-source/ai-master-challenge`, branch `submission/tassiani-ventura`, commit `f9a5cf2`. Projeto: `submissions/tassiani-ventura/solution`.
 
 ## Estado
 
-- MVP operacional implementado sobre o app e os dados existentes. Persistência transacional via SQLAlchemy em SQLite e preparado para PostgreSQL; CSVs históricos originais preservados como somente leitura.
-- Navegação diária usa **Minha fila**, **Clientes**, **Ficha do cliente**, **Tarefas e alertas**, **Vendas e oportunidades**, **Prioridades da carteira** e **Acompanhamento da equipe**. A consulta antiga fica em **Consulta histórica (dados até 2024)**; páginas técnicas ficam fora do menu diário.
-- Estados e chamadas de ação visíveis em português. Valores internos preservados para manter compatibilidade do banco.
-- README contém execução local, publicação Streamlit, configuração de banco e limitações de segurança/persistência.
+O MVP operacional foi implementado sobre o app e os dados existentes. A camada transacional SQLAlchemy suporta SQLite e está preparada para PostgreSQL; os CSVs históricos originais permanecem somente leitura. A navegação diária é **Minha fila**, **Clientes**, **Ficha do cliente**, **Tarefas e alertas**, **Vendas e oportunidades**, **Prioridades da carteira** e **Acompanhamento da equipe**. A consulta anterior a 2025 fica agrupada em **Consulta histórica (dados até 2024)**; páginas técnicas saíram do menu diário. Estados e chamadas de ação visíveis estão em português, mantendo valores internos compatíveis com o banco.
 
-## Testes finais
+A prévia temporária foi reiniciada e respondeu `ok` local e publicamente: https://8501-i7c7zs0wmld8y3izrwr79-c06a848f.us4.manus.computer. O processo vive somente durante este sandbox. O README contém instruções locais e de publicação no Streamlit.
 
-- `python -m compileall -q app.py pages src scripts tests`: passou.
-- Suíte completa: **88 passed in 207.54s** (`python -m pytest -q -W error::DeprecationWarning`).
-- Testes focados de UI/navegação, após últimos rótulos: **33 passed in 171.75s**.
-- `python -m pip check`: sem dependências quebradas; `git diff --check`: passou.
-- Playwright E2E: **exit 0**, A01–A15, criação/atendimento/tarefas/alertas/assinatura/legacy/auditoria, 20 rotas abertas e viewport 390×844 sem overflow horizontal. Evidência em `docs/browser-results.json` e `docs/screenshots/`.
+## Testes e pacote
+
+`compileall` passou. Suíte completa: **88 passed in 207.54s**. Testes focados de interface/navegação após os últimos rótulos: **33 passed in 171.75s**. `pip check` não encontrou dependências quebradas. Playwright E2E terminou com exit 0, verificando A01–A15, 20 rotas e viewport 390×844 sem overflow horizontal; evidências em `docs/browser-results.json` e `docs/screenshots/`.
+
+Validação de clone limpo em `/tmp/ravenstack-clean-clone` no commit `f9a5cf2`: compilação e `pip check` passaram; o store operacional inicializou e retornou 500 contas históricas e 500 clientes.
 
 ## Persistência e limitações reais
 
-Sem `DATABASE_URL`, SQLite local/demo grava em disco, mas não é durável nem compartilhado garantidamente no Streamlit Community Cloud. Para uso persistente, configure PostgreSQL gerenciado em Streamlit Secrets. PostgreSQL não foi testado contra uma instância; não há Alembic nem migração automática do SQLite anterior. Ainda não existe login/SSO/RBAC; ator e responsável são autodeclarados. Não usar PII no demo público. Dados históricos não provam churn/perda econômica.
+Sem `DATABASE_URL`, SQLite local/demo grava em disco, mas não é durável nem compartilhado garantidamente no Streamlit Community Cloud. Configure PostgreSQL gerenciado em Streamlit Secrets para retenção após reinício. PostgreSQL não foi testado contra uma instância; não há Alembic nem migração automática do SQLite anterior. Ainda não existe login/SSO/RBAC; ator e responsável são autodeclarados. Não usar PII no demo público. Eventos históricos não comprovam churn ou perda econômica.
 
-## Git e pacote
+## GitHub
 
-As mudanças finais de UX/documentação precisam ser commitadas e publicadas em `origin/submission/tassiani-ventura`. Como o `.gitignore` raiz ignora `submissions/`, usar `git add -f` apenas nos arquivos do projeto revisados, nunca adicionar diretórios inteiros com bancos ou caches. Gerar ZIP limpo com `git archive` após o commit e validar em clone/extrato limpo.
+A revisão de UX está publicada na branch informada. Os fontes estão dentro de `submissions/tassiani-ventura/solution`; o `.gitignore` da raiz ignora outras submissões, então mudanças futuras neste projeto devem usar `git add -f` apenas nos arquivos revisados, evitando diretórios com bancos ou caches.

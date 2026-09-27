@@ -8,17 +8,13 @@ A navegação diária usa nomes orientados à tarefa: **Minha fila**, **Clientes
 
 ## Python e integridade
 
-- `python -m compileall -q app.py pages src scripts tests`: passou.
-- Suíte completa `python -m pytest -q -W error::DeprecationWarning`: **88 passed in 207.54s**.
-- Testes focados de interface/navegação após a revisão final: **33 passed in 171.75s**.
-- `python -m pip check`: sem dependências quebradas.
-- `git diff --check`: passou.
+`python -m compileall -q app.py pages src scripts tests` passou. A suíte completa `python -m pytest -q -W error::DeprecationWarning` teve **88 passed in 207.54s**; os testes focados de interface/navegação após a revisão final tiveram **33 passed in 171.75s**. `python -m pip check` não encontrou dependências quebradas, e `git diff --check` passou.
 
-## E2E
+## E2E e clone limpo
 
-Comando: `RAVEN_PYTHON=python RAVEN_BROWSER_EXECUTABLE=/usr/bin/chromium npm run test:browser` — **exit 0** após a revisão final dos rótulos.
+Comando do browser: `RAVEN_PYTHON=python RAVEN_BROWSER_EXECUTABLE=/usr/bin/chromium npm run test:browser` — **exit 0**. Cobertura A01–A15: cadastro e ficha, contatos, tarefa atribuída/concluída, alerta tratado/auditado, alteração e encerramento de contratos, conta histórica com validação parcial e ação sobre sinal; **20 rotas abertas** e viewport **390×844 sem overflow horizontal**. Evidências: `docs/browser-results.json` e `docs/screenshots/`.
 
-Cobertura: A01–A15; cadastro e Ficha do cliente, contatos, tarefa atribuída e concluída, alerta tratado e auditado, alteração e encerramento de contratos, uso legacy com validação parcial, ação ligada a evidência histórica; **20 rotas abertas** e viewport **390×844 sem overflow horizontal**. Evidência: `docs/browser-results.json`; capturas em `docs/screenshots/`.
+O branch publicado foi clonado limpo em `/tmp/ravenstack-clean-clone` no commit `f9a5cf2`. `compileall`, `pip check`, inicialização da camada operacional e leitura dos dados passaram; resultado: **500 contas históricas e 500 clientes operacionais**. A prévia do Streamlit respondeu `ok` em localhost e pela URL pública temporária informada no HANDOFF.
 
 ## Integridade e limitações
 

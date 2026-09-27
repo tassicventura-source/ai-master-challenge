@@ -1,6 +1,6 @@
 # MVP_CHECKLIST — RavenStack Customer Journey
 
-**Revisão:** 2026-09-27 09:02 (São Paulo). Interface simplificada e fluxo operacional validado em Python e navegador.
+**Revisão:** 2026-09-27 09:04 (São Paulo). Interface simplificada e fluxo operacional validado em Python, navegador e clone limpo.
 
 | ID | Critério de aceite | Status | Evidência |
 |---|---|---|---|
@@ -22,10 +22,7 @@
 
 ## Evidência final
 
-- Suíte completa: **88 passed in 207.54s**.
-- Testes focados de interface/navegação após os últimos rótulos: **33 passed in 171.75s**.
-- Playwright: exit 0; A01–A15, 20 rotas abertas e tela mobile verificada. Evidências em `docs/browser-results.json` e `docs/screenshots/`.
-- `compileall`, `pip check` e `git diff --check` passaram.
+Suíte completa: **88 passed in 207.54s**; testes focados de interface/navegação após os rótulos finais: **33 passed in 171.75s**; Playwright exit 0, A01–A15, 20 rotas abertas e mobile verificado; `compileall`, `pip check` e `git diff --check` passaram. Clone limpo no commit `f9a5cf2` compilou e inicializou com **500 contas históricas e 500 clientes**.
 
 ## Limitações reais
 
