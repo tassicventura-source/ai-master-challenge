@@ -1,10 +1,10 @@
 # RavenStack — Sistema Operacional de Retenção
 
-Aplicação Streamlit para converter **dado → sinal → contexto → decisão → ação → responsável → acompanhamento → resultado**. A Central prioriza situações por regras explícitas, mostra a evidência/limitação, roteia para quatro áreas e grava tarefas com trilha de auditoria no modo demo.
+Aplicação Streamlit para converter **dado → sinal → contexto → decisão → ação → responsável → acompanhamento → resultado**. Além da Central de Retenção, há cadastro de leads/clientes, pipeline comercial editável, diário de interações por área, follow-ups com owner/prazo e Conta 360 operacional.
 
 **Base preservada:** projeto Customer Journey Intelligence existente, cinco tabelas originais, transformações canônicas, Conta 360, filtros, análises por área, exportações e testes anteriores. **Dados sintéticos · 500 contas · período 2023–2024.** Crédito obrigatório do dataset: **River @ Rivalytics**.
 
-> Os sinais são filas de triagem, não um modelo preditivo. `churn_event` não é perda de cliente nem perda de receita confirmada. Ações do modo demo não atualizam CRM, billing ou helpdesk.
+> Os sinais são filas de triagem, não um modelo preditivo. `churn_event` não é perda de cliente nem perda de receita confirmada. O CRM local é um sistema operacional **standalone** em modo demo: ele não sincroniza com CRM, billing ou helpdesk externos.
 
 ## Executar localmente
 
@@ -18,16 +18,18 @@ python scripts/build_data.py
 python -m streamlit run app.py
 ```
 
-A `Central de Retenção` é a página inicial. O banco de ações demo é criado em `data/retention_actions.sqlite` no primeiro uso; esse arquivo é runtime e está ignorado no Git. Para escolher outro caminho persistente, configure `RETENTION_DB_PATH`.
+A `Central de Retenção` é a página inicial; **CRM e operação comercial** está logo abaixo no menu lateral. O banco operacional demo é criado em `data/retention_actions.sqlite` no primeiro uso; esse arquivo é runtime e está ignorado no Git. Para escolher outro caminho persistente, configure `RETENTION_DB_PATH`.
 
 ## Como operar
 
 1. **Central de Retenção:** veja a fila priorizada em páginas de 25, filtre por área/prioridade e busque conta ou situação. O histórico termina em 31/12/2024; confirme o status atual em sistemas oficiais antes de intervir.
 2. Selecione um sinal para consultar **o que aconteceu, por que importa, evidência/IDs, incerteza e próxima ação sugerida**.
 3. Abra **Conta 360** para cruzar sinais, registros temporais, ações e resultado.
-4. Registre ou edite a ação, pessoa responsável, prioridade, prazo, status, observação e resultado. Conclusão exige resultado informado.
-5. Use as filas **Growth/Comercial**, **Produto**, **CS/Suporte** e **Finance/RevOps**. As análises originais continuam abaixo das novas filas.
-6. O histórico de mudanças é acrescentado à trilha de auditoria local; ações e recortes podem ser exportados em CSV.
+4. Em **CRM e operação comercial → Cadastrar conta**, crie um lead/cliente ou associe uma conta histórica pelo ID existente. Preencha responsável e etapa do pipeline; o valor é apenas estimativa de oportunidade.
+5. Em **Pipeline**, filtre por etapa/owner, atualize a etapa, registre ligação/reunião/proposta e informe o resultado. Em **Atividades e follow-ups**, atualize atividades planejadas para concluídas/canceladas e mantenha próxima ação e prazo.
+6. **Conta 360** combina o histórico observado (se houver) com owner, etapa, atividades e sinais operacionais. Leads novos sem presença no dataset aparecem sem métricas históricas inventadas.
+7. Na Central/filas, registre ações de retenção separadas do diário de atividades comercial. Conclusão exige resultado informado.
+8. Alterações de conta/interação são adicionadas à trilha de auditoria demo; tarefas e recortes podem ser exportados em CSV.
 
 ### Priorização: regras e limites
 
@@ -55,9 +57,9 @@ As regras completas e as premissas de uso permanecem também em `docs/DATA_MODEL
 
 ## Persistência e arquitetura
 
-O modo demo usa SQLite local com transações, ação com dono/prazo/status/observação/resultado, snapshot do sinal no momento do registro e tabela append-only de eventos de criação/alteração. Não há autenticação/segregação por usuário; portanto, não conecte dados reais de clientes nem use o SQLite local como persistência de produção.
+O modo demo usa SQLite local com transações e as entidades `crm_accounts`, `crm_interactions`, `crm_events`, além de `retention_actions` e `retention_action_events`. Cadastros têm origem explícita, owner, etapa, valor estimado/moeda, previsão e próxima ação; interações têm área, tipo, responsável, resultado, status e follow-up. Atualizações deixam eventos de auditoria da aplicação. Não há login, permissões, identidade verificada do operador nem sincronização externa.
 
-O disco do Streamlit Community Cloud pode ser efêmero e não deve ser tratado como banco compartilhado entre réplicas. Para produção, a arquitetura recomendada é PostgreSQL gerenciado persistente atrás de API autenticada, SSO/RBAC e trilha imutável; detalhes, migração de schema, backup, segurança e operações estão em `docs/PERSISTENCIA_ACOES.md`. Não há segredos ou integrações externas neste pacote.
+**Não coloque informações reais de clientes neste deployment público.** A interface mostra o aviso: o arquivo SQLite do Streamlit Community Cloud pode ser apagado em reboot/deploy e não é compartilhado com confiabilidade entre réplicas. Para um piloto real, primeiro restrinja o acesso e migre cadastro/interações/ações a PostgreSQL gerenciado atrás de API autenticada, SSO/RBAC, backups e trilha de auditoria com ator autenticado; detalhes estão em `docs/PERSISTENCIA_ACOES.md`. Não há segredos nem integração com um CRM externo neste pacote.
 
 ## GitHub e Streamlit Community Cloud
 
@@ -87,13 +89,14 @@ npm ci
 RAVEN_PYTHON=python RAVEN_BROWSER_EXECUTABLE=/usr/bin/chromium npm run test:browser
 ```
 
-O smoke test navega pelas páginas, valida drill-down, cria ação pelos formulários desktop/mobile, percorre todas as rotas em viewport desktop e móvel e verifica ausência de overflow horizontal. Teste unitário confirma recuperação da ação em novo processo Python. Os detalhes são gravados em `docs/browser-results.json` e capturas em `docs/screenshots/`.
+O smoke test navega pelas páginas, cria lead sintético, registra responsável/atividade/follow-up no Pipeline, confirma a mesma atividade na Conta 360, cria ações de retenção no desktop e mobile, percorre todas as rotas nos dois viewports e verifica ausência de overflow horizontal. Testes Python confirmam recuperação de CRM e ações após reiniciar o processo. Os detalhes ficam em `docs/browser-results.json` e capturas em `docs/screenshots/`.
 
 ## Estrutura
 
 - `src/retention.py` — sinais determinísticos e explicáveis.
 - `src/retention_ui.py` — Central, filas, detalhes e formulário.
-- `src/action_store.py` — SQLite demo e trilha de auditoria.
+- `src/crm_ui.py` — cadastro, pipeline, atividades, follow-ups e visão operacional da conta.
+- `src/action_store.py` — SQLite demo, CRUD operacional e trilhas de auditoria.
 - `data/raw/`, `data/processed/`, `data/audit/` — fontes preservadas, bases e checks de qualidade.
 - `tests/` — suíte original mais testes de sinal/ação/navegação.
 - `docs/PERSISTENCIA_ACOES.md` — arquitetura de produção; `docs/RETENTION_OPERATING_MODEL.md` — regras e fluxo de decisão.

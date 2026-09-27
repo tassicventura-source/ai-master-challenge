@@ -154,6 +154,7 @@ def render_retention_central() -> None:
     signals = load_signals()
     st.title("Central de Retenção")
     st.write("Transforme sinais observados em decisões, ações com responsável e prazo, e acompanhamento do resultado.")
+    st.page_link("pages/09_Operacao_CRM.py", label="Cadastrar cliente/lead · abrir pipeline · registrar atuação comercial", icon="👥")
     st.warning(f"Sinais históricos até {OBSERVATION_CUTOFF} para triagem e reconciliação agora — não monitoram estado atual da conta. São regras explícitas, sem score preditivo; evento legado, erro, ticket e valor inicial não confirmam churn ou perda econômica.")
     open_count, overdue, total = _action_summary()
     c1, c2, c3 = st.columns(3)

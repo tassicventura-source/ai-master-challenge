@@ -10,12 +10,23 @@
       "route": "Central de Retenção"
     },
     {
+      "crm": "created lead, assigned commercial owner, recorded interaction and follow-up",
+      "persisted": true
+    },
+    {
+      "crm": "lead activities visible in Conta 360",
+      "connected": true
+    },
+    {
+      "route": "CRM e operação comercial"
+    },
+    {
       "route": "Visão executiva"
     },
     {
       "route": "Conta 360",
       "csv": "jornada_A-2e4581.csv",
-      "bytes": 1414
+      "bytes": 1425
     },
     {
       "route": "Growth e Comercial",
@@ -59,6 +70,10 @@
     },
     {
       "mobile": "Central de Retenção",
+      "documentWidth": 390
+    },
+    {
+      "mobile": "CRM e operação comercial",
       "documentWidth": 390
     },
     {

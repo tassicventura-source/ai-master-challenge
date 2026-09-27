@@ -21,6 +21,7 @@ except (OSError, ValueError) as exc:
 
 page=st.navigation({
     'Decidir e investigar': [st.Page('pages/08_Central_de_Retencao.py', title='Central de Retenção', default=True),
+                            st.Page('pages/09_Operacao_CRM.py', title='CRM e operação comercial'),
                             st.Page('pages/00_Visao_Executiva.py', title='Visão executiva'),
                             st.Page('pages/01_Conta_360.py', title='Conta 360')],
     'Análises por área': [st.Page('pages/05_Growth_e_Comercial.py', title='Growth e Comercial'),

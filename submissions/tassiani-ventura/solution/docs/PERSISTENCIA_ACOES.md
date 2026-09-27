@@ -1,66 +1,78 @@
-# Persistência das ações: demo e arquitetura de produção
+# Persistência operacional: CRM, atividades e retenção
 
-## Modo demo implementado
+## O que funciona no modo demo
 
-O Streamlit grava em SQLite, separado do banco analítico: `data/retention_actions.sqlite` (ou caminho definido por `RETENTION_DB_PATH`). As tabelas são criadas automaticamente por `src/action_store.py`.
+O Streamlit grava na base SQLite `data/retention_actions.sqlite` (ou no caminho definido por `RETENTION_DB_PATH`), separada do banco analítico reconstruído. O schema é criado automaticamente por `src/action_store.py`.
 
-- `retention_actions`: estado atual de cada tarefa, com sinal/conta/área, dono, prioridade, prazo, status, observação, resultado, timestamps e snapshot JSON da evidência usada.
-- `retention_action_events`: evento append-only por criação/edição com timestamp UTC, tipo e JSON dos campos alterados.
-- Transação `BEGIN IMMEDIATE`, constraints de status, validação de campos obrigatórios, bloqueio contra reassociar uma tarefa a outro sinal e prazo no formato ISO.
-- Uma ação concluída exige resultado informado; o banco não verifica se esse resultado é verdadeiro.
-- Atualizar/refazer deploy do banco analítico (`ravenstack.sqlite`) não sobrescreve o arquivo de ações demo.
+| Tabela | Uso |
+|---|---|
+| `crm_accounts` | Cadastro standalone de lead/cliente, origem do registro, atributos informados, owner textual, etapa de jornada/pipeline, valor estimado e moeda, previsão e próxima ação. |
+| `crm_interactions` | Diário de ligação, reunião, proposta, suporte ou outra atuação por conta/área, com responsável, resultado, status e follow-up/prazo. |
+| `crm_events` | Trilha de criação/alterações de contas e interações, com timestamp UTC e JSON dos campos alterados. |
+| `retention_actions` | Ação vinculada a conta/sinal, área, owner, prioridade, prazo, status, observação, resultado e snapshot da evidência. |
+| `retention_action_events` | Trilha das alterações das ações de retenção. |
+
+O fluxo disponível em **CRM e operação comercial** permite:
+
+1. Cadastrar um lead/cliente ou associar um registro analítico pelo ID já existente.
+2. Definir etapa, responsável, segmento, canal e valor **estimado** da oportunidade (não receita realizada).
+3. Atualizar a etapa e o owner no Pipeline.
+4. Registrar a atuação comercial/CS/Suporte por tipo, área, resumo e resultado.
+5. Manter atividade planejada, próxima ação e prazo; concluir ou cancelar sem apagar o histórico.
+6. Abrir a Conta 360 operacional, consultar atividades e trilha de mudanças.
+
+O ID de uma conta associada ao dataset é reutilizado, mas os campos comerciais são armazenados em camada separada. Um lead `CRM-*` não recebe telemetria, receita, assinatura ou histórico inventado. Cadastro/interação não altera os CSVs nem sincroniza com CRM, billing ou helpdesk externo.
+
+As gravações da demonstração usam transação SQLite (`BEGIN IMMEDIATE`), validações de owner/campos/etapas e eventos de auditoria da aplicação. Atividade concluída exige resultado declarado; uma próxima ação exige prazo. A aplicação registra o que a pessoa informou — não verifica que a atividade ou resultado realmente ocorreu. Um usuário de banco com acesso ao arquivo ainda pode alterar tabelas/eventos diretamente; não se trata de auditoria criptograficamente imutável.
 
 Teste local:
 
 ```bash
 python -m streamlit run app.py
-# Criar uma ação na Central; reiniciar o processo; confirmar que continua listada.
+# CRM e operação comercial → Cadastrar conta → Pipeline → atividade/follow-up
+# Reinicie o processo local e confira as contas e atividades registradas.
 ```
 
-`RETENTION_DB_PATH=/caminho/persistente/acoes.sqlite` permite apontar para volume montado localmente. O modo demo não deve receber dados pessoais ou de cliente real: responsável é texto livre, não há login, autorização, isolamento multi-tenant ou criptografia gerenciada.
+`RETENTION_DB_PATH=/caminho/persistente/operacao.sqlite` seleciona outro arquivo local. Responsáveis são texto livre, não associados a diretório de usuários.
 
-### Limite de deploy Streamlit
+## Limites de uso do Streamlit Community Cloud
 
-SQLite valida o ciclo funcional e é persistente entre reruns/reinício **quando o mesmo disco persiste**, mas não é banco compartilhado escalável. O armazenamento local do Streamlit Community Cloud pode ser efêmero/recriado em deploy ou reboot e réplicas podem ter discos separados. Então essa implantação serve a demo, não ao system of record operacional. O volume de dados de amostra é sintético; para um piloto de produção escolha serviço com filesystem persistente ou, recomendado, banco gerenciado.
+O Community Cloud pode descartar/recriar o armazenamento local em deploy ou reboot; réplicas podem não compartilhar o mesmo disco. A URL existente foi publicada sem autenticação de aplicação. Embora o CRUD funcione para demonstrar o fluxo, a URL pública **não deve receber nomes, e-mails, contatos, notas comerciais, dados reais de cliente ou informações confidenciais**. O aviso de segurança é exibido dentro do app.
+
+Para um teste com dados não públicos, primeiro restrinja a visibilidade do app no Cloud e confirme quem tem acesso. A opção de tornar o repositório/app privado é uma configuração da conta que deve ser verificada no workspace antes de inserir dados reais; este código não implementa login ou autorização.
 
 ## Arquitetura recomendada para produção
 
 ```text
-Browser/Streamlit UI
-    │ SSO OIDC + RBAC; sessão curta, CSRF e auditoria de identidade
-    ▼
-Retention API (stateless; valida esquema, acesso a conta e transições)
-    ├── PostgreSQL gerenciado (source of truth de ações/snapshots/eventos)
-    ├── job idempotente que lê fontes analíticas e grava versão de sinais
-    └── integrações de CRM/helpdesk/billing por API, somente após contrato/owner de campos
-         (sem publicar mudança automática de churn ou receita)
+Usuário autenticado (SSO/OIDC)
+        │ sessão e papel verificados
+        ▼
+UI Streamlit (sem segredos nem credenciais compartilhadas)
+        │ API autenticada; validação de acesso por conta/tenant
+        ▼
+API de operações (stateless, esquema e transições controladas)
+        ├── PostgreSQL gerenciado — cadastro, pipeline, atividades, ações e eventos
+        ├── diretório/CRM — IDs de operador/conta e permissões autorizadas
+        ├── job idempotente — leitura das fontes aprovadas e versão/corte dos sinais
+        └── integrações CRM/helpdesk/billing — apenas após contrato e aprovação do owner
 ```
 
-### Tabelas/entidades sugeridas
+### Entidades para o banco compartilhado
 
-- `signal_definition`: `rule_id`, versão, descrição, denominador/filtro/limiar, proprietário, `valid_from/to`, checks de qualidade.
-- `signal_instance`: `signal_id` (estável ou UUID), `rule_id/version`, `account_id`, área, campos de prioridade e explicação, `evidence_snapshot`, `source_refs`, `observed_at`, cutoff e versão/hash da fonte.
-- `retention_action`: `action_id`, `signal_id`, `account_id`, área, texto, owner como FK para diretório/CRM, prioridade, `due_at`, status, observação, resultado, criador/atualizador e timestamps.
-- `retention_action_event`: evento append-only, action/version, ator autenticado, instante, estado anterior/novo e motivo.
-- `outcome_reconciliation`: registro independente e aprovado por Finance/RevOps para ligar contrato, fatura, pagamento, movimento, MRR antes/depois e classificação econômica. `churn_event` só é evidência de origem, nunca resultado automático.
+- `crm_account`: `account_id`, `record_origin`, atributos de cadastro, `owner_id` de diretório, etapa, valor estimado/moeda, data esperada e versionamento.
+- `crm_interaction`: conta, tipo/área, data, resumo, ator autenticado, resultado declarado, status e follow-up/prazo.
+- `crm_event`: entidade/versionamento, estado anterior/novo, ator autenticado, timestamp e motivo; escrita append-only pela API.
+- `retention_action` / `retention_action_event`: sinal imutável/snapshot, conta, owner de diretório, prazo/status/resultado e trilha.
+- `outcome_reconciliation`: registro separado, aprovado por Finance/RevOps, para ligar contrato, fatura, pagamento, MRR antes/depois e classificação econômica.
 
-Migrar com migrations numeradas e compatibilidade para trás; chaves estrangeiras, constraints de status, índice por área/status/prazo/conta e controle otimista de versão. Se necessário, particione o event log por data depois de medir volume.
+### Requisitos antes do piloto real
 
-### Segurança e confiabilidade
+1. SSO/OIDC e RBAC; autorizar cada conta/tenant/área e usar identidade do operador, nunca confiar em owner digitado.
+2. PostgreSQL gerenciado via API autenticada, TLS, secrets manager, criptografia e backups/PITR testados.
+3. Migrações versionadas, constraints de domínio, controle de concorrência e auditoria imutável, exportável e monitorada.
+4. Política de dados/privacidade, retenção e deleção aprovada; campos de notas e PII minimizados.
+5. Acesso de menor privilégio, alertas/observabilidade, objetivos RPO/RTO e procedimento de restauração.
+6. Integrações externas com outbox/idempotência, retry com dead-letter e aprovação humana antes de qualquer escrita em sistemas de origem.
+7. Não importar P1/P2/P3 como churn nem atribuir resultado econômico automaticamente. `churn_event`, valor de refund informado e valor inicial continuam não reconciliados.
 
-1. OIDC/SSO; papéis por área, autorização por conta/tenant e segregação de organizações antes de habilitar dados de cliente real.
-2. Segredos apenas no secret manager do ambiente; TLS em trânsito; criptografia/backup do serviço gerenciado; princípio de menor privilégio e rotações.
-3. API valida owners ativos, prazos, transições de estado, acesso à conta, limite do corpo e valores dos enums. Não confiar em nome de usuário digitado no form.
-4. Eventos de auditoria não editáveis por operação de usuário; correções via novo evento com ator/motivo; trilha exportável e monitorada.
-5. Backup criptografado, PITR, política de retenção, teste periódico de restauração e objetivos RPO/RTO aprovados antes do go-live.
-6. Outbox/idempotência para integrações, dead-letter/retry, rate limits, monitoramento de falhas e reconciliação; nunca usar retry para duplicar ações externas.
-7. Observabilidade: logs estruturados sem feedback sensível, métricas de latência/erros, alertas de fila atrasada e monitoramento de freshness/quality dos dados.
-8. Aprovação humana antes de escrita em CRM/billing/helpdesk; Finance valida qualquer outcome econômico. Nenhum bulk write até testar permissões, rollback e auditoria.
-
-### Passagem do demo para produção
-
-- O provider de dados de ações deve ser interface independente do Streamlit; adapte `src/action_store.py` para uma API autenticada/repositório PostgreSQL.
-- A API emite `actor_id` de claims OIDC e troca owner livre por ID de diretório; migre status/observações/resultados com IDs e timestamps, sem fabricar quem operou historicamente.
-- Mantenha `signal_snapshot_json`/IDs/hashes dos registros originais; deixe clara a regra/versão aplicada e a data de corte.
-- Execute uma migração e reconciliação somente depois de aprovação do dono de dados. Não importa prioridade P1/P2/P3 como churn nem MRR em risco.
-- Valide concorrência, permissões, privacidade, backup/restauração, idempotência e disponibilidade antes da primeira gravação real.
+A passagem do demo para produção exige substituir o provider SQLite por API/repositório PostgreSQL e testar migração, isolamento, permissões, privacidade, concorrência e restauração. Configurar apenas uma variável/secret de banco não torna o app seguro nem converte a SQLite atual em banco de produção.

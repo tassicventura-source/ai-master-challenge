@@ -1,47 +1,51 @@
-# Validação final — Sistema Operacional de Retenção
+# Validação final — Sistema Operacional de Retenção e CRM demo
 
-**Execução:** 26/09/2026, no ambiente Linux/Python 3.12.14. Este relatório diferencia a linha de base da implementação final.
+**Execução desta revisão:** 26/09/2026, Linux/Python 3.12.14. Este relatório distingue a linha de base histórica do resultado nesta cópia local da branch.
 
-## Linha de base, antes das alterações
+## Linha de base antes da camada operacional
 
-O Streamlit existente respondeu ao endpoint de saúde; sua suíte tinha **35 testes aprovados**. O smoke test original percorreu as oito páginas anteriores em Chromium, baixou recortes e verificou Conta 360/drill-down em viewport de 390 px. As leituras e limitações analíticas preexistentes foram preservadas.
+O Streamlit existente respondeu ao endpoint de saúde; sua suíte original tinha **35 testes aprovados**. O smoke test anterior percorria as páginas da análise, baixava recortes e verificava Conta 360/drill-down em viewport de 390 px. Documentos, CSVs e regras analíticas recebidos permaneceram preservados.
 
-## Resultado final
+## Resultado desta revisão
 
 - `python scripts/build_data.py`: aprovado; reconstruiu 500 accounts, 5.000 subscriptions, 25.000 eventos de uso, 2.000 tickets, 600 eventos legados, 500 Account 360 e oito linhas de quality summary.
-- `python -m pytest -q -W error::DeprecationWarning`: **47 testes aprovados em 63,62 s, sem warnings**; inclui dez testes dedicados de retenção/ações, um AppTest da Central e a nova rota na navegação parametrizada.
+- `python -m pytest -q -W error::DeprecationWarning`: **55 testes aprovados, sem warnings**. Inclui os testes anteriores, CRUD/auditoria para CRM, atividades/follow-ups e a página CRM no AppTest.
 - `python -m compileall -q app.py pages src scripts tests`: aprovado.
 - `python -m pip check`: `No broken requirements found.`
-- Chromium Playwright: health `ok`; nove páginas navegadas; drill-down Finance → Conta 360; formulários criaram tarefas no desktop e no mobile; documento e viewport de 390 px sem overflow horizontal; zero erros de página. Relatório de execução: `browser-results.json`; capturas: `screenshots/`.
-- Teste separado cria ação num processo Python e a carrega num novo processo, conservando responsável, observação e ID. Testes adicionais cobrem transação, update/event log, snapshot, bloqueio de reassociação, campos obrigatórios e resultado ao concluir.
+- `git diff --check`: aprovado.
+- Chromium Playwright: servidor local health `ok`; 10 rotas; drill-down Finance → Conta 360; cadastro de lead, responsável comercial, atividade e follow-up; atividade do lead visível na Conta 360; criação de ação de retenção desktop/mobile; download de CSV; zero erros de página; todos os viewports de 390×844 com largura do documento = 390 (sem overflow horizontal). Veja `browser-results.json` e as capturas de `screenshots/`.
+- Reinício de processo real: conta, etapa e atividade/follow-up foram recuperados do SQLite no novo processo Python.
 
 | Cobertura | Resultado |
 |---|---|
 | Quatro áreas e regras determinísticas com IDs estáveis | Aprovado; 939 sinais do recorte histórico derivado das fontes (sem score ou estado atual inferido) |
 | Coorte Growth 2024 × Organic × Enterprise × D90 | Aprovado; 22 casos, 14 com e 8 sem evento legado |
-| Produto | Aprovado; apenas erros dentro da janela e limiar explícito >= 5 por conta × feature |
+| Produto | Aprovado; erros dentro da janela e limiar explícito ≥ 5 por conta × feature |
 | CS/Suporte | Aprovado; somente urgent/escalated em ou após signup |
 | Finance/RevOps | Aprovado; 600 linhas no grão de evento, sem transformar `churn_event` em perda econômica |
-| Central, quatro filas e Conta 360 | Aprovado; filas filtráveis, paginação de 25 e formulário de ação |
-| Ação, status, prazo, dono, observação, resultado e auditoria | Aprovado em SQLite demo; concluir sem resultado é bloqueado |
-| Browser desktop/mobile | Aprovado em 1440×1000 e 390×844; ações, downloads e drill-down verificados |
-| Cinco fontes originais | SHA-256 após o build idênticos aos CSVs recebidos; detalhes em `data/audit/` |
+| Central, quatro filas e Conta 360 | Aprovado; filas filtráveis, paginação de 25, detalhes e ações |
+| CRM demo | Aprovado; cadastro, associação por ID, pipeline/owner/valor estimado e atividades atribuídas a área/responsável |
+| Follow-up e resultado | Aprovado; próxima ação precisa de prazo; concluir atividade exige resultado declarado; Conta 360 liga interação ao mesmo ID |
+| Auditoria e persistência | Aprovado no SQLite de demo; eventos de criação/alteração e leitura após reiniciar processo |
+| Browser desktop/mobile | Aprovado em 1440×1000 e 390×844; navegação, cadastro, atuação/follow-up, ações, downloads e drill-down |
+| Cinco fontes originais | SHA-256 após build idênticos aos CSVs recebidos; detalhes em `data/audit/` |
 
-## Critérios preservados
+## Critérios analíticos preservados
 
-A regra de elegibilidade D90 e a flag legada `is_reactivation` mantêm a semântica da versão anterior. Continuam explícitos os 400/500 registros divergentes entre indicadores de churn, 531/600 eventos com linha paga vigente, 67 antes do primeiro pagamento, 2 entre linhas, 5.568/25.000 usos dentro da janela e 1.077/2.000 tickets pré-signup. São dados sintéticos com cutoff em 31/12/2024; erro/uso/ticket não prova churn e crédito/reembolso informado não confirma caixa ou perda.
+A regra de elegibilidade D90 e a flag legada `is_reactivation` mantêm a semântica anterior. Permanecem explícitos os 400/500 registros divergentes entre indicadores de churn, 531/600 eventos com linha paga vigente, 67 antes do primeiro pagamento, 2 entre linhas, 5.568/25.000 usos dentro da janela e 1.077/2.000 tickets pré-signup. São dados sintéticos com cutoff em 31/12/2024; erro/uso/ticket não prova churn, e crédito/reembolso informado não confirma caixa ou perda.
 
-A camada de ações **não** altera as cinco fontes, a Account 360 canônica, as definições históricas ou os sistemas externos. Owners e resultados são informados manualmente, snapshot e histórico ficam no SQLite local de demo. “Concluída” significa status declarado pelo operador, não outcome econômico verificado.
+O CRM standalone não altera fontes, Conta 360 canônica, regras históricas ou sistemas externos. Um lead novo não recebe histórico ou valor de receita inventado. Owners/resultados são dados informados pelo operador demo; “Concluída” é status declarado, não outcome econômico verificado.
 
-## Capturas e arquivos de auditoria
+## Capturas e artefatos
 
-- `browser-results.json` registra rotas, drill-down, downloads, ações desktop/mobile e largura medida.
-- `screenshots/00-central-desktop.png` e `screenshots/00-central-mobile.png` registram a Central.
-- Capturas adicionais preservam a revisão visual de cada rota em desktop/mobile.
-- Os CSVs originais foram comparados diretamente por SHA-256 antes do empacotamento; conteúdo idêntico.
+- `browser-results.json` registra as dez rotas, drill-down, downloads, fluxo CRUD e largura dos viewports.
+- `screenshots/crm-e-opera--o-comercial-desktop.png` e `screenshots/crm-e-opera--o-comercial-mobile.png` mostram o CRM em desktop e mobile após o fluxo de teste.
+- `screenshots/00-central-desktop.png` e `screenshots/00-central-mobile.png` mostram a Central.
+- As outras capturas guardam a revisão visual das páginas existentes.
+- Os CSVs originais foram comparados por SHA-256 antes do empacotamento; conteúdo idêntico.
 
-## Limites e fora do escopo
+## Limites
 
-Esta é uma validação automatizada/técnica com inspeção visual; não é pesquisa de usabilidade com operadores reais, homologação por especialistas, teste de carga multiusuário, teste de segurança ou certificação de resultados. Windows foi revisado mas não executado. GitHub Actions está preparado, mas requer push para rodar no hosted runner. Não houve criação/publicação de repositório remoto nem deploy em Streamlit Community Cloud.
+A validação é automatizada/técnica e inspeção visual; não é pesquisa de usabilidade com operadores reais, homologação de especialistas, teste de carga multiusuário, teste de segurança, acessibilidade completa ou certificação de resultados. Windows não foi executado. Não há autenticação/RBAC, provedor compartilhado persistente, sincronização por API, histórico de imports CRM, nem escrita em CRM/billing/helpdesk.
 
-SQLite local demonstra persistência, inclusive em novo processo, **somente enquanto o arquivo e seu disco persistirem**. Streamlit Community Cloud não garante armazenamento compartilhado/estável entre redeploy/reboots/réplicas. Use o modo demo somente com dados sintéticos; consulte `PERSISTENCIA_ACOES.md` antes de ligar identidades, dados de clientes ou sistemas externos. Não existe risco/health score, atualização por API, autenticação/RBAC nem escrita de CRM/billing/helpdesk.
+O SQLite local demonstra persistência enquanto o arquivo e disco persistirem. Streamlit Community Cloud pode apagar/recriar o armazenamento e não o compartilha de forma garantida entre réplicas. **Não usar a URL pública com dados reais ou confidenciais.** Este relatório certifica testes locais desta revisão; o push e o rebuild do Community Cloud são etapas separadas.

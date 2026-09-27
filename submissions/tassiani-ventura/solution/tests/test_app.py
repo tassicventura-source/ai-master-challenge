@@ -25,6 +25,13 @@ def test_retention_central_renders_prioritized_cases_and_action_fields():
     assert any(w.label=='Status' for w in at.selectbox)
     assert_ok(at)
 
+def test_crm_workspace_exposes_registration_pipeline_and_activity_forms():
+    at=app('09_Operacao_CRM.py')
+    assert at.title[0].value=='CRM e Operação Comercial'
+    assert any('Cadastrar conta' in t.label for t in at.tabs)
+    assert any('Pipeline' in t.label for t in at.tabs)
+    assert_ok(at)
+
 @pytest.mark.parametrize('page',PAGES)
 def test_every_route_and_widget_options(page):
     at=app(page)
