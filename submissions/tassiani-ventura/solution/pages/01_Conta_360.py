@@ -4,6 +4,7 @@ from src.ui import setup_page
 from src.data_access import load_table
 from src.analytics import fmt_money
 from src.explore import account_filters, table, CONTEXTS
+from src.retention_ui import render_account_operations
 
 setup_page(st,'Conta 360')
 st.title('Conta 360')
@@ -49,4 +50,6 @@ st.caption(f'{len(view)} de {len(timeline)} registros · mais recentes primeiro'
 table(view,'jornada_'+aid+'.csv')
 with st.expander('Resumo de uso e atendimento'):
     st.write(f'{int(r.valid_features_used)} funcionalidades com uso na janela · {int(r.valid_errors)} erros registrados · {int(r.valid_interactions)} atendimentos pós-cadastro.')
-    st.write('Dados de owner, próxima ação e etapa atual ainda não foram coletados. Esta versão permite investigação e exportação; não grava tarefas ou alterações nos sistemas de origem.')
+    st.write('Owner e próxima ação não existem no histórico de origem. O registro criado aqui fica no SQLite local de demonstração; não atualiza CRM, billing ou helpdesk.')
+st.divider()
+render_account_operations(aid)

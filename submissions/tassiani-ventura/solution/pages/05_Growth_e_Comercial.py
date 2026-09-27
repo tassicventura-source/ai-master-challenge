@@ -4,10 +4,13 @@ from src.ui import setup_page
 from src.data_access import load_table
 from src.analytics import growth_by_source
 from src.explore import account_filters, table, open_account, LABELS
+from src.retention_ui import render_area_queue
 
 setup_page(st,'Growth e Comercial')
 st.title('Growth e Comercial')
 st.write('Compare volume, valor de entrada e eventos precoces por origem.')
+render_area_queue('Growth/Comercial')
+st.divider()
 a=account_filters(load_table('account_360'),'growth')
 if a.empty: st.info('Ajuste os filtros para continuar.'); st.stop()
 g=growth_by_source(a)

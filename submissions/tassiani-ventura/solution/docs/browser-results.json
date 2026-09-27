@@ -2,6 +2,17 @@
   "health": "ok",
   "routes": [
     {
+      "action": "created",
+      "owner": "QA Retenção",
+      "persisted": true
+    },
+    {
+      "route": "Central de Retenção"
+    },
+    {
+      "route": "Visão executiva"
+    },
+    {
       "route": "Conta 360",
       "csv": "jornada_A-2e4581.csv",
       "bytes": 1414
@@ -37,9 +48,22 @@
       "ok": true
     },
     {
+      "action": "created-mobile",
+      "owner": "QA Mobile",
+      "persisted": true
+    },
+    {
       "mobileWidth": 390,
       "documentWidth": 390,
       "clientWidth": 390
+    },
+    {
+      "mobile": "Central de Retenção",
+      "documentWidth": 390
+    },
+    {
+      "mobile": "Visão executiva",
+      "documentWidth": 390
     },
     {
       "mobile": "Conta 360",

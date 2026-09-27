@@ -3,10 +3,13 @@ import plotly.express as px
 from src.ui import setup_page
 from src.data_access import load_table
 from src.explore import account_filters, table, open_account, LABELS
+from src.retention_ui import render_area_queue
 
 setup_page(st,'Produto')
 st.title('Produto')
 st.write('Localize funcionalidades com erros e investigue as contas afetadas.')
+render_area_queue('Produto')
+st.divider()
 a=account_filters(load_table('account_360'),'product')
 u=load_table('feature_usage'); u=u[u.account_id.isin(a.account_id)]
 uv=u[u.temporal_status.eq('within_subscription')]

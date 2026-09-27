@@ -3,10 +3,13 @@ from src.ui import setup_page
 from src.data_access import load_table
 from src.analytics import support_priority_summary
 from src.explore import account_filters, table, open_account
+from src.retention_ui import render_area_queue
 
 setup_page(st,'Suporte e CS')
 st.title('Suporte e CS')
 st.write('Observe a carga de atendimento e aprofunde a jornada das contas.')
+render_area_queue('CS/Suporte')
+st.divider()
 a=account_filters(load_table('account_360'),'support')
 x=load_table('customer_interactions'); x=x[x.account_id.isin(a.account_id)]
 valid=x[x.lifecycle_temporal_status.eq('on_or_after_signup')]
@@ -25,4 +28,4 @@ st.subheader('Contas atendidas')
 open_account(accounts,'support_account')
 table(accounts,'suporte_contas.csv')
 with st.expander('O que ainda falta para orientar CS'):
-    st.write('Tema, causa, impacto, resultado e próxima ação não existem no histórico. Suporte deve capturar esses campos; CS deve registrar seus próprios contatos na mesma estrutura. Satisfação média representa apenas quem respondeu.')
+    st.write('Tema, causa e impacto não existem no histórico de tickets; CS também não tem contatos de origem registrados. A tarefa e o resultado informado podem ser acompanhados no SQLite demo, sem substituir a captura desses campos nos sistemas oficiais. Satisfação representa apenas quem respondeu.')

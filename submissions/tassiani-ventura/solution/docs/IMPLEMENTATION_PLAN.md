@@ -41,3 +41,9 @@ Somente depois de o outcome econômico estar reconciliado:
 - cost-to-serve;
 - priorização de backlog por contas e valor afetados;
 - avaliação de ações de CS.
+
+## Atualização — camada operacional entregue (26/09/2026)
+
+Acrescentados na Fase 0 a Central paginada, sinais determinísticos com regras/evidência/incerteza, filas das quatro áreas, integração Conta 360 e registro local de ações com responsáveis, prazo, status, resultado e trilha de alterações. O SQLite mantém modo demo e a evidência sintética; é uma camada operacional de demonstração, não autorização para tratar essa base como system of record.
+
+As Fases 1–3 continuam necessárias para operações reais: validar os sistemas oficiais atuais, instrumentar os campos do dono de dados, identificar operadores por SSO/RBAC e obter persistência compartilhada/auditoria operacional. Fase 4 permanece condicionada a outcomes econômicos reconciliados e avaliação específica; não faz parte desta entrega.

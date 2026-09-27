@@ -15,6 +15,16 @@ def app(page):
 def assert_ok(at):
     assert not at.exception, [e.message for e in at.exception]
 
+def test_retention_central_renders_prioritized_cases_and_action_fields():
+    at=app('08_Central_de_Retencao.py')
+    assert at.title[0].value=='Central de Retenção'
+    assert any('Sinais para triagem' in m.label for m in at.metric)
+    assert any(w.label=='Responsável' for w in at.text_input)
+    assert any(w.label=='Ação a executar' for w in at.text_area)
+    assert any(w.label=='Prazo' for w in at.date_input)
+    assert any(w.label=='Status' for w in at.selectbox)
+    assert_ok(at)
+
 @pytest.mark.parametrize('page',PAGES)
 def test_every_route_and_widget_options(page):
     at=app(page)
@@ -22,7 +32,7 @@ def test_every_route_and_widget_options(page):
         # Account options are covered separately across all accounts.
         if idx >= len(at.selectbox): continue
         widget=at.selectbox[idx]
-        if 'conta' in widget.label.lower(): continue
+        if 'conta' in widget.label.lower() or 'situação para decidir' in widget.label.lower() or 'sinal desta conta' in widget.label.lower(): continue
         for option in list(widget.options):
             at.selectbox[idx].select(option).run()
             assert_ok(at)

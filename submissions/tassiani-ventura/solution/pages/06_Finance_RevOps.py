@@ -4,10 +4,13 @@ from src.ui import setup_page
 from src.data_access import load_table
 from src.analytics import fmt_money
 from src.explore import account_filters, table, open_account, CONTEXTS, display_frame
+from src.retention_ui import render_area_queue
 
 setup_page(st,'Finance e RevOps')
 st.title('Finance e RevOps')
 st.write('Confira quais eventos precisam de confirmação contratual e econômica.')
+render_area_queue('Finance/RevOps')
+st.divider()
 a=account_filters(load_table('account_360'),'finance')
 life=load_table('lifecycle_events'); life=life[life.account_id.isin(a.account_id)]
 c1,c2,c3=st.columns(3)
@@ -27,6 +30,6 @@ if refund_only:v=v[v.refund_amount_usd.gt(0)]
 v=v.merge(a[['account_id','account_name']],on='account_id',validate='many_to_one').sort_values(['refund_amount_usd','event_date'],ascending=False)
 table(v[['event_id','account_id','account_name','event_date','paid_context_at_event','reason_code','refund_amount_usd','next_paid_start_date']],'finance_eventos.csv')
 open_account(v[['account_id','account_name']].drop_duplicates(),'finance_account')
-st.info('Responsável sugerido: Finance/RevOps, com Comercial. Para cada evento, confirmar contrato, movimento e MRR antes/depois nos registros de origem. A fila pode ser exportada; esta versão não grava a conciliação.')
+st.info('Responsável sugerido: Finance/RevOps, com Comercial. Para cada evento, confirmar contrato, movimento e MRR antes/depois nos registros de origem. A ação e seu acompanhamento são persistidos em modo demo; a conciliação econômica continua pendente nos sistemas de origem.')
 with st.expander('Critério de classificação'):
     st.write('Linha paga: não trial e MRR positivo. Vigência: início ≤ evento ≤ fim, incluindo limites; fim vazio é aberto no histórico. Contexto pago não equivale a pagamento liquidado. Tipo canônico e impacto econômico permanecem vazios até confirmação.')

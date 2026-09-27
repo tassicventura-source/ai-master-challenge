@@ -7,6 +7,7 @@ from src.explore import table
 setup_page(st, 'Visão executiva')
 st.title('O que exige atenção agora')
 st.write('Conecte o sinal do negócio à conta e à evidência que sustenta a decisão.')
+st.page_link('pages/08_Central_de_Retencao.py', label='Abrir Central de Retenção e registrar ações →')
 a=load_table('account_360'); life=load_table('lifecycle_events')
 active=life.paid_context_at_event.eq('paid_line_active').sum()
 c1,c2,c3=st.columns(3)

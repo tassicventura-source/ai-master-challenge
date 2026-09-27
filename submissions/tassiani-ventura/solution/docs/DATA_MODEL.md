@@ -56,6 +56,12 @@ Campos econômicos: MRR, seats e plano antes/depois.
 
 Nada é apagado do histórico bruto. Campos retirados do modelo canônico ficam preservados em `data/raw` e nos arquivos de auditoria em `data/audit`.
 
+## Camada operacional de retenção (demo)
+
+`src/retention.py` deriva sinais determinísticos das cinco saídas canônicas; os sinais guardam regra, prioridade explicada, incerteza e referências às linhas de origem. Os IDs de origem continuam disponíveis para Conta 360. A prioridade P1/P2/P3 direciona trabalho, sem score preditivo e sem outcome econômico inferido.
+
+As ações vivem em `data/retention_actions.sqlite`, separado do banco de análise: owner informado, tarefa, prioridade, prazo, status, observação, resultado declarado, snapshot da evidência e eventos append-only de auditoria. Essa base demonstra persistência local; não adiciona campos retroativamente às fontes nem altera CRM/billing/helpdesk. SQLite local não é system of record compartilhado de produção; veja `PERSISTENCIA_ACOES.md`.
+
 ## Correções da versão de desenvolvimento
 
 - `legacy_reactivation_flag` preserva a flag original sem transformar automaticamente o evento em reativação.
