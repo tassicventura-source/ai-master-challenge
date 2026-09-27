@@ -15,6 +15,7 @@ O Streamlit existente respondeu ao endpoint de saúde; sua suíte original tinha
 - `git diff --check`: aprovado.
 - Chromium Playwright: servidor local health `ok`; 10 rotas; drill-down Finance → Conta 360; cadastro de lead, responsável comercial, atividade e follow-up; atividade do lead visível na Conta 360; criação de ação de retenção desktop/mobile; download de CSV; zero erros de página; todos os viewports de 390×844 com largura do documento = 390 (sem overflow horizontal). Veja `browser-results.json` e as capturas de `screenshots/`.
 - Reinício de processo real: conta, etapa e atividade/follow-up foram recuperados do SQLite no novo processo Python.
+- Streamlit Community Cloud: push/rebuild do commit `49582cf` na branch `submission/tassiani-ventura` concluído; logs mostraram dependências instaladas e Uvicorn iniciado com Python 3.14.7. A URL pública e a rota `/Operacao_CRM` foram abertas e exibiram cadastro/pipeline sem erro. Não foi cadastrado dado de cliente no deployment público.
 
 | Cobertura | Resultado |
 |---|---|
@@ -48,4 +49,4 @@ O CRM standalone não altera fontes, Conta 360 canônica, regras históricas ou 
 
 A validação é automatizada/técnica e inspeção visual; não é pesquisa de usabilidade com operadores reais, homologação de especialistas, teste de carga multiusuário, teste de segurança, acessibilidade completa ou certificação de resultados. Windows não foi executado. Não há autenticação/RBAC, provedor compartilhado persistente, sincronização por API, histórico de imports CRM, nem escrita em CRM/billing/helpdesk.
 
-O SQLite local demonstra persistência enquanto o arquivo e disco persistirem. Streamlit Community Cloud pode apagar/recriar o armazenamento e não o compartilha de forma garantida entre réplicas. **Não usar a URL pública com dados reais ou confidenciais.** Este relatório certifica testes locais desta revisão; o push e o rebuild do Community Cloud são etapas separadas.
+O SQLite local demonstra persistência enquanto o arquivo e disco persistirem. Streamlit Community Cloud pode apagar/recriar o armazenamento e não o compartilha de forma garantida entre réplicas. **Não usar a URL pública com dados reais ou confidenciais.** O deployment verificado demonstra a execução do fluxo CRUD, mas não é um CRM de produção seguro/system of record até conectar autenticação e armazenamento persistente compartilhado.
