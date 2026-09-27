@@ -1,7 +1,0 @@
-# Copie para .streamlit/config.toml se desejar personalizar o deploy.
-[theme]
-base="light"
-primaryColor="#176BCE"
-backgroundColor="#F5F7FA"
-secondaryBackgroundColor="#FFFFFF"
-textColor="#162033"

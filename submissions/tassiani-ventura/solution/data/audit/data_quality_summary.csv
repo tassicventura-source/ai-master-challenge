@@ -1,9 +1,0 @@
-base,check,count,denominator,status
-accounts,Linhas,500,500,ok
-subscriptions,Linhas,5000,5000,ok
-feature_usage,Eventos dentro da janela da subscription,5568,25000,attention
-customer_interactions,Interações no ou após signup,923,2000,attention
-lifecycle_events,Eventos com contexto pago ativo,531,600,critical
-accounts,Contas com desacordo entre três sinais legados de churn,400,500,critical
-feature_usage,IDs de origem duplicados,42,25000,attention
-customer_interactions,Satisfaction ausente,825,2000,attention
