@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RavenStack — Relatório Final | Challenge 01</title>
+<style>
+:root{--ink:#172033;--muted:#667085;--line:#e5e7eb;--soft:#f7f9fb;--navy:#17324a;--teal:#0f766e;--amber:#8a5a00;--red:#a63a32;--max:1040px}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:#fff;color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;line-height:1.62}
+main{max-width:var(--max);margin:0 auto;padding:72px 34px 90px}
+header{padding-bottom:46px;border-bottom:1px solid var(--line)}
+.kicker{font-size:13px;letter-spacing:.06em;color:var(--muted);margin-bottom:14px}
+h1{font-size:48px;line-height:1.04;letter-spacing:-.035em;margin:0 0 20px;max-width:850px;font-weight:760}
+.subtitle{font-size:20px;line-height:1.55;max-width:880px;color:#344054;margin:0}
+.scope{margin-top:22px;font-size:13px;color:var(--muted)}
+section{padding:54px 0;border-bottom:1px solid var(--line)}
+h2{font-size:31px;line-height:1.18;letter-spacing:-.022em;margin:0 0 20px}
+h3{font-size:20px;line-height:1.3;margin:34px 0 10px}
+p{margin:0 0 16px;max-width:880px}
+strong{font-weight:720}
+.lead{font-size:18px;color:#344054}
+.question{font-size:22px;line-height:1.45;font-weight:680;max-width:900px;margin:24px 0 0;color:var(--navy)}
+.note{font-size:13px;color:var(--muted);max-width:900px}
+.statement{margin:28px 0;padding:0 0 0 18px;border-left:3px solid var(--navy);font-size:18px;line-height:1.55;max-width:900px}
+.statement.warn{border-left-color:var(--amber)}
+.statement.good{border-left-color:var(--teal)}
+.table-wrap{overflow:auto;margin:24px 0 16px}
+table{width:100%;border-collapse:collapse;font-size:14px;line-height:1.45}
+th{text-align:left;font-size:12px;letter-spacing:.02em;color:var(--muted);font-weight:700;padding:10px 12px;border-bottom:1px solid #cfd5dd;vertical-align:bottom}
+td{padding:13px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+tr.focus td{background:#f9fbfc}
+.delta{display:block;color:var(--muted);font-size:12px;margin-top:3px;white-space:nowrap}
+.compare{display:grid;grid-template-columns:1fr 1fr 1.2fr;gap:0;border-top:1px solid var(--line);margin-top:28px}
+.compare>div{padding:20px 18px 18px 0;border-bottom:1px solid var(--line)}
+.compare>div:nth-child(3n+2),.compare>div:nth-child(3n+3){padding-left:18px;border-left:1px solid var(--line)}
+.compare .metric{font-size:26px;font-weight:760;letter-spacing:-.025em;margin-bottom:4px}
+.compare .desc{font-size:13px;color:var(--muted)}
+.event-flow{margin:28px 0 24px}
+.flow-bar{height:18px;border-radius:99px;overflow:hidden;display:flex;background:#eef1f4}
+.seg1{width:88.500%;background:var(--navy)}
+.seg2{width:11.167%;background:#b7c4cf}
+.seg3{width:0.333%;background:var(--amber);min-width:3px}
+.flow-legend{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:14px}
+.flow-legend strong{display:block;font-size:22px;margin-bottom:3px}
+.flow-legend span{font-size:13px;color:var(--muted)}
+.bar-block{margin:26px 0 8px;max-width:780px}
+.bar-row{display:grid;grid-template-columns:90px 1fr 64px;gap:12px;align-items:center;margin:9px 0;font-size:13px}
+.bar-track{height:10px;background:#eef1f4;border-radius:99px;overflow:hidden}
+.bar-fill{height:100%;background:var(--navy);border-radius:99px}
+.action{display:grid;grid-template-columns:44px 1fr;gap:18px;padding:28px 0;border-top:1px solid var(--line)}
+.action:first-of-type{margin-top:12px}
+.num{width:34px;height:34px;border:1px solid #bcc6d0;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:750;color:var(--navy)}
+.action h3{margin:0 0 9px;font-size:20px}
+.action p{margin-bottom:10px}
+.meta{font-size:13px;color:var(--muted)}
+.dont{margin-top:20px;padding:20px 22px;background:var(--soft);font-size:15px;max-width:900px}
+details{border-top:1px solid var(--line);padding:18px 0}
+details:last-child{border-bottom:1px solid var(--line)}
+summary{cursor:pointer;font-weight:700}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;background:#f3f4f6;padding:2px 5px;border-radius:4px}
+.ids{line-height:1.9}
+footer{padding-top:34px;color:var(--muted);font-size:12px}
+@media(max-width:760px){main{padding:42px 20px 70px}h1{font-size:37px}h2{font-size:27px}.compare{grid-template-columns:1fr}.compare>div,.compare>div:nth-child(3n+2),.compare>div:nth-child(3n+3){padding:16px 0;border-left:0}.flow-legend{grid-template-columns:1fr}.bar-row{grid-template-columns:72px 1fr 58px}.action{grid-template-columns:36px 1fr}}
+@media print{main{max-width:none;padding:0}section{break-inside:avoid}details{display:block}summary{list-style:none}}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <div class="kicker">RavenStack Retention Intelligence · Challenge 01</div>
+  <h1>Churn, crescimento e valor econômico</h1>
+  <p class="subtitle">Em 2024, a RavenStack cresceu em volume e em valor de entrada ao mesmo tempo em que os registros de churn nos primeiros 90 dias ficaram muito mais frequentes. O cruzamento das cinco bases mostra que esses eventos não correspondem, de forma consistente, à saída do cliente — e que o crescimento também mudou de composição.</p>
+  <p class="scope">Dados sintéticos · cobertura de 01/01/2023 a 31/12/2024 · análise no grão adequado a cada pergunta</p>
+</header>
+
+<section>
+  <h2>2024 trouxe mais clientes, muito mais valor — e um sinal que parece preocupante</h2>
+  <p>Foram <strong>273 novos cadastros em 2024</strong>, contra 227 em 2023. O crescimento de volume foi de 20,3%. No mesmo período, o valor comercial registrado na primeira entrada paga passou de <strong>US$ 503.575 para US$ 891.676</strong>, alta de 77,1%.</p>
+  <p>Ao mesmo tempo, entre as contas que puderam ser acompanhadas por pelo menos 90 dias, <strong>92 de 195 contas de 2024</strong> registraram um primeiro <code>churn_event</code> nesse intervalo — 47,2%. Em 2023, foram 44 de 227 — 19,4%.</p>
+
+  <div class="compare">
+    <div><div class="metric">227 → 273</div><div class="desc">novos cadastros por ano · +20,3%</div></div>
+    <div><div class="metric">US$ 503.575 → US$ 891.676</div><div class="desc">valor de entrada · +77,1%</div></div>
+    <div><div class="metric">19,4% → 47,2%</div><div class="desc">contas com primeiro evento em até 90 dias · coortes com janela completa</div></div>
+  </div>
+
+  <p class="note" style="margin-top:18px">“Valor de entrada” = soma da receita recorrente mensal (MRR) das linhas pagas iniciadas na primeira data em que a conta aparece paga. É uma régua comparável de aquisição; não representa MRR atual nem receita perdida.</p>
+  <p class="question">A pergunta de gestão passa a ser: a RavenStack cresceu com pior retenção — ou o registro chamado churn está capturando outros movimentos do ciclo comercial?</p>
+</section>
+
+<section>
+  <h2>Quando seguimos as contas depois do evento, o registro não se comporta como saída</h2>
+  <p>Os 600 <code>churn_events</code> acontecem em três contextos diferentes. Em nenhum deles o evento, sozinho, identifica uma perda definitiva de cliente ou de receita.</p>
+
+  <div class="event-flow">
+    <div class="flow-bar"><div class="seg1"></div><div class="seg2"></div><div class="seg3"></div></div>
+    <div class="flow-legend">
+      <div><strong>531</strong><span>eventos acontecem enquanto existe uma linha paga vigente (88,5%).</span></div>
+      <div><strong>67</strong><span>acontecem antes da primeira linha paga (11,2%).</span></div>
+      <div><strong>2</strong><span>acontecem entre relações pagas; as duas contas voltam a pagar depois.</span></div>
+    </div>
+  </div>
+
+  <p>A mesma contradição aparece na base de assinaturas. Das <strong>408 linhas pagas encerradas</strong>, 399 tinham outra linha paga vigente na mesma data. Nas 9 restantes, outra linha paga começa entre <strong>3 e 157 dias</strong> depois. Somar o MRR dessas linhas encerradas (US$ 1.179.139) e chamá-lo de receita perdida seria incorreto.</p>
+
+  <p>As próprias representações de churn entram em conflito: <strong>400 das 500 contas</strong> não têm a mesma classificação entre <code>accounts.churn_flag</code>, presença de <code>churn_event</code> e encerramento de linha paga.</p>
+
+  <p>O acompanhamento posterior reforça o ponto. Entre as contas de 2024 com evento precoce e 90 dias completos depois do evento, <strong>67 de 68</strong> ainda tinham uma linha paga ativa no dia +90. E <strong>89 de 92</strong> apresentam uso temporalmente válido depois do evento.</p>
+
+  <div class="statement">Os 47,2% medem a frequência de um <strong>evento registrado</strong> nos primeiros 90 dias. Eles não podem ser apresentados como taxa de clientes perdidos ou de receita perdida.</div>
+
+  <p>Há ainda um segundo fator: <strong>a própria janela temporal do dataset reproduz grande parte desse salto</strong>. As contas de 2024 têm menos tempo total até o corte de 31/12/2024, o que comprime os eventos para mais perto do cadastro. Quando aplicamos o padrão temporal observado em 2023 às janelas disponíveis em 2024, o resultado esperado é cerca de <strong>42,9%</strong> de eventos nos primeiros 90 dias — próximo dos 47,2% observados.</p>
+  <p class="note">É um teste de sensibilidade, não uma correção dos dados. Ele mostra que o aumento de 19,4% para 47,2% não pode ser atribuído integralmente a uma piora do negócio.</p>
+  <div class="statement"><strong>Com as cinco bases atuais, a causa comercial do churn econômico não é identificável com segurança.</strong> Antes de explicar por que clientes foram perdidos, a RavenStack precisa identificar quais eventos realmente terminaram em perda de cliente ou de MRR. O problema comprovado hoje é a falta de reconciliação entre evento, assinatura e resultado econômico.</div>
+</section>
+
+<section>
+  <h2>O crescimento de 2024 foi forte, mas sua qualidade varia muito por canal</h2>
+  <p>O aumento total de valor de entrada foi de <strong>US$ 388.101</strong>. Organic sozinho respondeu por 64,6% desse crescimento. Outros canais contam histórias diferentes quando volume e valor são colocados lado a lado.</p>
+
+  <div class="table-wrap"><table>
+    <thead><tr><th>Canal</th><th>Novos cadastros</th><th>Valor de entrada</th><th>Mediana por conta</th><th>O que mudou</th></tr></thead>
+    <tbody><tr class="focus">
+      <td><strong>Organic</strong></td>
+      <td>43 → 71<span class="delta">+28</span></td>
+      <td>US$ 70.748 → US$ 321.475<span class="delta">+US$ 250.727</span></td>
+      <td>US$ 1.194 → US$ 2.388</td>
+      <td>Cresceu em volume e valor; é o principal motor econômico de 2024.</td>
+    </tr><tr class="focus">
+      <td><strong>Event</strong></td>
+      <td>44 → 52<span class="delta">+8</span></td>
+      <td>US$ 112.955 → US$ 117.367<span class="delta">+US$ 4.412</span></td>
+      <td>US$ 1.200 → US$ 882</td>
+      <td>Ganhou volume, mas quase não ganhou valor; a mediana caiu.</td>
+    </tr><tr class="">
+      <td><strong>Partner</strong></td>
+      <td>45 → 44<span class="delta">−1</span></td>
+      <td>US$ 99.617 → US$ 132.651<span class="delta">+US$ 33.034</span></td>
+      <td>US$ 1.323 → US$ 1.703</td>
+      <td>Volume estável, com valor de entrada maior.</td>
+    </tr><tr class="">
+      <td><strong>Ads</strong></td>
+      <td>48 → 50<span class="delta">+2</span></td>
+      <td>US$ 144.778 → US$ 181.446<span class="delta">+US$ 36.668</span></td>
+      <td>US$ 689 → US$ 1.826</td>
+      <td>Pouco ganho de volume, com forte melhora do valor de entrada.</td>
+    </tr><tr class="">
+      <td><strong>Other</strong></td>
+      <td>47 → 56<span class="delta">+9</span></td>
+      <td>US$ 75.477 → US$ 138.737<span class="delta">+US$ 63.260</span></td>
+      <td>US$ 1.026 → US$ 1.194</td>
+      <td>Crescimento material escondido em uma categoria pouco explicativa.</td>
+    </tr></tbody>
+  </table></div>
+
+  <div class="bar-block">
+    <p class="note" style="margin-bottom:10px">Participação no crescimento do valor de entrada de 2023 para 2024</p>
+    <div class="bar-row"><div>Organic</div><div class="bar-track"><div class="bar-fill" style="width:64.6%"></div></div><div>64.6%</div></div><div class="bar-row"><div>Event</div><div class="bar-track"><div class="bar-fill" style="width:1.1%"></div></div><div>1.1%</div></div><div class="bar-row"><div>Partner</div><div class="bar-track"><div class="bar-fill" style="width:8.5%"></div></div><div>8.5%</div></div><div class="bar-row"><div>Ads</div><div class="bar-track"><div class="bar-fill" style="width:9.4%"></div></div><div>9.4%</div></div><div class="bar-row"><div>Other</div><div class="bar-track"><div class="bar-fill" style="width:16.3%"></div></div><div>16.3%</div></div>
+  </div>
+
+  <p><strong>Organic</strong> adicionou 28 contas, equivalentes a 60,9% do crescimento líquido da base, e acrescentou US$ 250.727 de valor de entrada. <strong>Event</strong>, por outro lado, adicionou 8 contas, mas apenas US$ 4.412; sua mediana caiu de US$ 1.200 para US$ 882.</p>
+
+  <div class="statement warn">Avaliar aquisição apenas por número de contas esconderia uma diferença importante: em 2024 houve canais que cresceram em volume e valor, e outros que cresceram quase só em volume.</div>
+
+  <p>O crescimento também ficou concentrado por vertical. <strong>EdTech e Cybersecurity somaram 43 dos 46 cadastros líquidos adicionais</strong> e 79,1% do aumento do valor de entrada. Essas dimensões se sobrepõem a canal e plano; são outra lente sobre a mesma carteira, não percentuais para somar.</p>
+</section>
+
+<section>
+  <h2>Dentro de Organic, quase todo o novo valor veio de Enterprise ou de entradas mistas</h2>
+  <p>Organic não cresceu de forma homogênea. Basic caiu em contas e valor. Pro cresceu moderadamente. Enterprise e as contas com entrada mista — mais de um plano pago na mesma data — concentraram o avanço.</p>
+
+  <div class="table-wrap"><table>
+    <thead><tr><th>Primeira entrada paga</th><th>Contas 2023</th><th>Contas 2024</th><th>Valor 2023</th><th>Valor 2024</th><th>Variação de valor</th></tr></thead>
+    <tbody><tr class="">
+      <td><strong>Basic</strong></td><td>14</td><td>12</td>
+      <td>US$ 6.764</td><td>US$ 5.871</td><td>−US$ 893</td>
+    </tr><tr class="">
+      <td><strong>Pro</strong></td><td>18</td><td>23</td>
+      <td>US$ 22.393</td><td>US$ 37.583</td><td>+US$ 15.190</td>
+    </tr><tr class="focus">
+      <td><strong>Enterprise</strong></td><td>11</td><td>33</td>
+      <td>US$ 41.591</td><td>US$ 217.507</td><td>+US$ 175.916</td>
+    </tr><tr class="focus">
+      <td><strong>Misto</strong></td><td>0</td><td>3</td>
+      <td>US$ 0</td><td>US$ 60.514</td><td>+US$ 60.514</td>
+    </tr></tbody>
+  </table></div>
+
+  <p>Enterprise e Misto explicam <strong>25 das 28 contas líquidas adicionais de Organic</strong> (89,3%) e <strong>US$ 236.430 dos US$ 250.727 adicionais</strong> (94,3%).</p>
+
+  <p>O tamanho dessas entradas também mudou. Entre contas Organic em que Enterprise está presente na primeira data paga, a mediana do valor de entrada passa de <strong>US$ 3.184 para US$ 6.070</strong>, enquanto a mediana de seats vai de 16 para 30,5.</p>
+
+  <p>É justamente nesse motor econômico que aparece um sinal que merece investigação. Entre as contas Organic com primeiro plano pago Enterprise em 2024 e 90 dias completos de observação, <strong>14 de 22</strong> registram evento precoce.</p>
+
+  <div class="statement good">Esse grupo não deve ser tratado como “segmento que mais churna”. Ele deve ser priorizado porque reúne <strong>alto valor comercial e alta ambiguidade no ciclo de vida da conta</strong>. Comparar as 14 jornadas com evento às 8 equivalentes sem evento é o caminho mais curto para descobrir se existe problema de qualificação, promessa, onboarding, produto, preço — ou apenas classificação do evento.</div>
+</section>
+
+<section>
+  <h2>Reembolsos e créditos aumentaram, mas não equivalem a perda de receita</h2>
+  <p>Há <strong>US$ 8.652,25</strong> registrados em reembolsos/créditos, distribuídos em 142 eventos de 120 contas. Esse valor é real como campo registrado, mas não está ligado a uma fatura ou transação específica e a documentação admite tanto <em>refund</em> quanto <em>credit</em>.</p>
+
+  <p>Isso aparece diretamente no comportamento dos dados: <strong>13 eventos</strong>, somando US$ 469,54, ocorrem antes da primeira linha paga; 129 dos 142 ocorrem enquanto existe linha paga vigente. Entre os 81 eventos com 90 dias completos depois do registro, <strong>81/81</strong> ainda têm uma linha paga ativa no dia +90, e 64 iniciam uma nova linha paga nesse intervalo.</p>
+
+  <p>O que de fato mudou foi a frequência do mecanismo: entre contas com 90 dias completos, reembolso/crédito nos primeiros 90 dias aparece em <strong>6/227 (2,6%) em 2023</strong> e <strong>31/195 (15,9%) em 2024</strong>. Na coorte comparável de 2024, Organic registra 27,1%, contra 12,2% fora de Organic. Dentro de Organic, o sinal é mais concentrado em Basic e Pro: 5/10 contas Basic e 4/16 Pro têm reembolso/crédito precoce, contra 4/22 Enterprise. As amostras são pequenas, mas ajudam a separar dois problemas diferentes: <strong>Enterprise concentra crescimento; Basic/Pro concentram mais fricção de reembolso/crédito.</strong></p>
+
+  <div class="statement warn">Financeiro e RevOps devem investigar por que reembolsos/créditos ficaram mais frequentes em 2024 — especialmente em Organic. Mas os US$ 8.652,25 não devem ser chamados de churn de receita, caixa perdido ou perda definitiva de cliente sem vínculo com cobrança e desfecho econômico.</div>
+</section>
+
+<section>
+  <h2>Produto, suporte e os motivos declarados não explicam o fenômeno geral</h2>
+  <p>As hipóteses de falha de Produto ou Suporte foram investigadas, mas a evidência não fecha uma explicação geral. Parte importante desses dados também tem problemas temporais: <strong>19.142 dos 25.000 registros de uso</strong> precedem o início da assinatura à qual estão ligados, e apenas 5.568 ficam dentro da janela temporal da própria assinatura. Em Suporte, <strong>1.077 dos 2.000 chamados</strong> aparecem antes do cadastro da conta.</p>
+
+  <p>Nos registros temporalmente válidos, não surge uma deterioração consistente antes dos eventos. Além disso, os motivos declarados também não se comportam como motivos de saída definitiva. Entre os eventos com 90 dias de acompanhamento, todos os motivos registrados apresentam nova linha paga em até 90 dias em taxas entre <strong>76,9% e 87,9%</strong>.</p>
+
+  <div class="table-wrap" style="max-width:620px"><table>
+    <thead><tr><th>Motivo registrado</th><th>Eventos com 90d</th><th>Nova linha paga em até 90d</th></tr></thead>
+    <tbody><tr><td>pricing</td><td>58</td><td>87,9%</td></tr><tr><td>competitor</td><td>61</td><td>83,6%</td></tr><tr><td>features</td><td>61</td><td>83,6%</td></tr><tr><td>support</td><td>63</td><td>81,0%</td></tr><tr><td>budget</td><td>57</td><td>80,7%</td></tr><tr><td>unknown</td><td>52</td><td>76,9%</td></tr></tbody>
+  </table></div>
+
+  <p>Preço, produto, suporte, orçamento e concorrência continuam sendo hipóteses possíveis para perdas reais específicas. O que os dados atuais não permitem é tratá-los como causa geral enquanto o desfecho econômico de cada evento permanecer indefinido.</p>
+</section>
+
+<section>
+  <h2>O que a RavenStack deve fazer agora</h2>
+
+  <div class="action"><div class="num">1</div><div>
+    <h3>Fechar o desfecho econômico das 92 contas por trás dos 47,2%</h3>
+    <p>Financeiro, RevOps e Dados devem reconciliar contrato, fatura, pagamento, assinatura relacionada ao evento e receita recorrente mensal (MRR) antes/depois. Cada caso termina classificado como perda total, contração, expansão, pausa, troca/recontratação, reativação, reembolso/crédito ou evento sem perda comprovada.</p>
+    <p class="meta"><strong>Primeiro fechamento:</strong> 10 dias úteis. <strong>Resultado esperado:</strong> quantos dos 92 eventos representam perda real de cliente, quanto MRR foi perdido e quantos eram apenas movimentação comercial.</p>
+  </div></div>
+
+  <div class="action"><div class="num">2</div><div>
+    <h3>Proteger o crescimento enquanto testa sua qualidade</h3>
+    <p>Aquisição, Comercial, CS e Produto devem reconstruir as <strong>22 jornadas Organic × Enterprise</strong> comparáveis de 2024 — 14 com evento e 8 sem evento — e abrir o canal Event por campanha/origem. Organic também precisa ganhar granularidade de conteúdo, página, oportunidade e vendedor; “Other” precisa deixar de ser uma categoria residual.</p>
+    <p class="meta"><strong>Prazo:</strong> duas semanas. <strong>Resultado esperado:</strong> identificar quais origens e jornadas geram valor retido e quais geram apenas volume, reembolso/crédito ou movimentação de contrato.</p>
+  </div></div>
+
+  <div class="action"><div class="num">3</div><div>
+    <h3>Transformar ciclo de vida da conta e receita em uma única verdade operacional</h3>
+    <p>Dados + RevOps devem conectar, para as 500 contas, <strong>conta → contrato → assinatura → cobrança → pagamento → MRR antes/depois → movimento → estado final</strong>. Na mesma camada, Comercial, CS e Produto registram promessa, primeiro valor, bloqueios, uso, suporte, responsável e próxima ação.</p>
+    <p class="meta"><strong>Implantação inicial:</strong> 30 dias; piloto completo de valor em 60 dias. <strong>Resultado esperado:</strong> perda de clientes (logo churn), churn de receita, GRR (retenção bruta), NRR (retenção líquida), tempo até primeiro valor e priorização por valor × risco validado.</p>
+  </div></div>
+
+  <div class="dont">Até essa reconciliação, os dados não sustentam três decisões: <strong>tratar 47,2% como churn real</strong>, reduzir investimento em <strong>Organic</strong> por causa do <code>churn_event</code> ou treinar um modelo de risco usando esse evento como resultado econômico.</div>
+</section>
+
+<section>
+  <h2>Apêndice para auditoria</h2>
+  <p class="lead">A parte técnica fica aqui para preservar a leitura executiva sem perder rastreabilidade.</p>
+
+  <details>
+    <summary>Contas Organic × Enterprise usadas na comparação de 2024</summary>
+    <p style="margin-top:14px"><strong>Com evento em até 90 dias (14):</strong></p>
+    <p class="ids"><code>A-0a282f</code>, <code>A-592832</code>, <code>A-526d93</code>, <code>A-117171</code>, <code>A-71615e</code>, <code>A-1619f8</code>, <code>A-b9eed8</code>, <code>A-0cc442</code>, <code>A-0baac2</code>, <code>A-09316c</code>, <code>A-50bb9f</code>, <code>A-751c58</code>, <code>A-bb1eaa</code>, <code>A-781cc0</code></p>
+    <p><strong>Sem evento em até 90 dias (8):</strong></p>
+    <p class="ids"><code>A-30b4ca</code>, <code>A-6f8ad2</code>, <code>A-faa28c</code>, <code>A-adc1f3</code>, <code>A-4ef964</code>, <code>A-fd9422</code>, <code>A-560d27</code>, <code>A-940b8b</code></p>
+  </details>
+
+  <details>
+    <summary>Definições usadas</summary>
+    <p style="margin-top:14px"><strong>Evento precoce:</strong> primeiro <code>churn_event</code> em até 90 dias após o cadastro, somente em contas com 90 dias completos até 31/12/2024.</p>
+    <p><strong>Valor de entrada:</strong> soma do MRR das linhas pagas iniciadas na primeira data em que a conta aparece paga. Serve para comparar aquisição; não é MRR atual.</p>
+    <p><strong>Misto:</strong> conta com mais de um plano pago na primeira data paga. Ela permanece separada, em vez de ser forçada para um único plano.</p>
+    <p><strong>Continuidade paga:</strong> existência de linha paga cobrindo a data observada. É um sinal de continuidade comercial registrada, não prova de receita reconhecida.</p>
+  </details>
+
+  <details>
+    <summary>Limitações que mudam a interpretação</summary>
+    <ul>
+      <li>As subscriptions se sobrepõem; somar linhas abertas não produz MRR atual confiável.</li>
+      <li><code>accounts.churn_flag</code>, <code>churn_events</code> e encerramentos de subscription não são equivalentes.</li>
+      <li>Uso e suporte têm inconsistências temporais materiais; análises longitudinais usam apenas registros válidos.</li>
+      <li>O dataset termina em 31/12/2024; comparações temporais sofrem censura/janela de observação. No teste de sensibilidade, o tempo normalizado até o evento não difere entre 2023 e 2024 (Mann–Whitney p≈0.404); a janela disponível se associa fortemente ao tempo absoluto até o evento (Spearman ρ≈0.645).</li>
+      <li>Os dados são sintéticos. Os padrões encontrados descrevem este conjunto de dados, não clientes SaaS reais em geral.</li>
+    </ul>
+  </details>
+
+  <details>
+    <summary>Fontes</summary>
+    <p style="margin-top:14px">Cinco bases originais: <code>accounts</code>, <code>subscriptions</code>, <code>feature_usage</code>, <code>support_tickets</code> e <code>churn_events</code>. README usado como documentação; divergências entre documentação e dados foram tratadas como achados.</p>
+  </details>
+</section>
+
+<footer>
+  RavenStack Retention Intelligence · Challenge 01 · dataset sintético 2023–2024<br>
+  Crédito do dataset: River @ Rivalytics.
+</footer>
+</main>
+</body>
+</html>
