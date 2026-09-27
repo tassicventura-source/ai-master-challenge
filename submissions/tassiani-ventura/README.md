@@ -6,7 +6,7 @@
 - **LinkedIn:** https://www.linkedin.com/in/tassianiventura/
 - **Challenge escolhido:** 001 — Diagnóstico de Churn
 
-Sou estrategista e mentora em liderança e produtividade estratégica, com atuação orientada a gestão, pessoas, processos e execução. Tenho um perfil especialmente analítico e, entre os challenges de Marketing e Churn, escolhi Churn porque combinava essa força com uma exigência técnica maior — justamente a competência que eu queria tensionar neste teste. O objetivo foi não escolher o caminho mais confortável, mas usar IA para ampliar minha capacidade técnica sem terceirizar o julgamento estratégico.
+Minha trajetória passou por conteúdo, gestão de projetos, liderança, processos, conteúdo e aquisição, dentro do marketing digital. Hoje sigo trabalhando isso, conectando liderança e produtividade. Acredito que pessoas, processos e tecnologia são pilares fundamentais hoje em dia. Foi isso que quis explorar neste desafio. 
 
 ---
 
