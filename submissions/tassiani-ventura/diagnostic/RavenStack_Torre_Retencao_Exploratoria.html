@@ -354,7 +354,7 @@ function openJourneyAccounts(step){
   let rows=[], label='';
   if(step==='j_exit'){ const ids=[...new Set(CHU.map(e=>e[0]))]; rows=ids.map(id=>ACC_IDX[id]).filter(Boolean); label='352 contas com saída registrada alguma vez'; }
   if(step==='j_react'){ const reactIds=new Set(CHU.filter(e=>e[3]===1).map(e=>e[0])); rows=ACC.filter(a=>reactIds.has(a[0]) && a[7]===0); label='Contas reativadas que continuam ativas hoje'; }
-  if(step==='j_churn_now'){ rows=ACC.filter(a=>a[7]===1); label='110 contas com churn confirmado hoje'; }
+  if(step==='j_churn_now'){ rows=ACC.filter(a=>a[7]===1); label='110 contas com accounts.churn_flag = true'; }
   if(!rows.length && step!=='j_react') { openExplain(step); return; }
   openModal('Contas desta etapa · base completa', label, accListHtml(rows));
 }
@@ -506,17 +506,17 @@ document.getElementById('btn-reset').addEventListener('click', ()=>{
 });
 document.getElementById('btn-export').addEventListener('click', ()=>{
   const {base, events} = computeView();
-  const churned = base.filter(a=>a[7]===1);
-  const mrrRisk = churned.reduce((s,a)=>s+a[6],0), mrrTotal = base.reduce((s,a)=>s+a[6],0);
+  const flagged = base.filter(a=>a[7]===1);
+  const touched = new Set(events.map(e=>e[0])).size;
+  const refund = events.reduce((sum,e)=>sum+e[4],0);
   const parts = [state.year!=='all'?'Período: '+state.year:'Período: todos', state.ch!=='all'?'Canal: '+state.ch:'Canal: todos', state.plan!=='all'?'Plano: '+state.plan:'Plano: todos'];
-  const reasonRows = Object.keys(REASON_LABEL).map(r=>'<li><b>'+REASON_LABEL[r]+'</b> — '+events.filter(e=>e[2]===r).length+' evento(s). '+GLOSSARY[r]+'</li>').join('');
-  const actionRows = ACTIONS.slice(0,3).map((a,i)=>'<li><b>'+(i+1)+'. '+a.h+'</b> — '+a.d+' <i>('+a.imp+')</i></li>').join('');
-  document.getElementById('print-content').innerHTML = '<h1 style="font-family:Fraunces,serif;">RavenStack · Briefing executivo</h1>'+
-    '<p style="color:#555;">Gerado em '+new Date().toLocaleDateString('pt-BR')+' · '+parts.join(' · ')+'</p>'+
-    '<h2 style="font-size:16px;">Números-chave</h2><ul><li>Contas na base: <b>'+base.length+'</b></li><li>Churn confirmado hoje: <b>'+fmtPct(base.length?churned.length/base.length*100:0)+'</b> ('+churned.length+' contas)</li><li>Eventos de saída no período: <b>'+events.length+'</b></li><li>MRR em risco: <b>'+fmtUSD(mrrRisk)+'/mês</b> de '+fmtUSD(mrrTotal)+'/mês na base</li></ul>'+
-    '<h2 style="font-size:16px;">Motivos declarados (glossário)</h2><ul>'+reasonRows+'</ul>'+
-    '<h2 style="font-size:16px;">O que fazer primeiro</h2><ol>'+actionRows+'</ol>'+
-    '<p style="color:#777;font-size:11px;margin-top:24px;">Dados sintéticos. Motivo declarado ≠ causa comprovada. MRR em risco é aproximação pelo valor mais recente da conta.</p>';
+  const actionRows = ACTIONS.map((x,i)=>'<li><b>'+(i+1)+'. '+x.h+'</b> — '+x.d+'</li>').join('');
+  document.getElementById('print-content').innerHTML = '<h1>RavenStack · Torre de Retenção · protótipo exploratório</h1>'+
+    '<p>'+parts.join(' · ')+'</p>'+
+    '<p><b>Nota:</b> o Relatório Final é a fonte oficial das conclusões. churn_event e accounts.churn_flag não equivalem automaticamente a perda econômica.</p>'+
+    '<h2>Números do filtro</h2><ul><li>Contas: <b>'+base.length+'</b></li><li>accounts.churn_flag=true: <b>'+flagged.length+'</b></li><li>churn_events: <b>'+events.length+'</b> em '+touched+' conta(s)</li><li>Refund/crédito registrado: <b>'+fmtUSD(refund)+'</b></li></ul>'+
+    '<h2>Prioridades do diagnóstico final</h2><ol>'+actionRows+'</ol>'+
+    '<p style="font-size:11px;color:#777;">Dados sintéticos. Evento registrado ≠ perda comprovada. Refund/crédito ≠ receita perdida.</p>';
   window.print();
 });
 document.querySelectorAll('nav.quicknav a').forEach(a=>a.addEventListener('click', ()=>{ document.querySelectorAll('nav.quicknav a').forEach(x=>x.classList.remove('on')); a.classList.add('on'); }));
