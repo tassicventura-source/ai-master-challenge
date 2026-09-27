@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>RavenStack · Torre de Retenção</title>
+<title>RavenStack · Torre de Retenção — Protótipo Exploratório</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -56,7 +56,7 @@ nav.quicknav{display:flex; gap:2px; overflow-x:auto; padding:0 20px 10px; max-wi
 nav.quicknav a{font-size:12px; color:var(--muted); white-space:nowrap; padding:5px 10px; border-radius:20px; text-decoration:none;}
 nav.quicknav a:hover, nav.quicknav a.on{background:var(--chip); color:var(--ink);}
 
-.zone-head{margin:48px 0 4px; padding-top:20px;}
+.notice{margin:22px 0 10px;padding:16px 18px;border:1px solid var(--line);border-left:3px solid var(--accent);background:var(--card);border-radius:var(--radius);font-size:13.5px;color:var(--muted);}\n.notice strong{color:var(--ink);}\n.zone-head{margin:48px 0 4px; padding-top:20px;}
 .zone-head .zk{font-size:11.5px; font-weight:700; letter-spacing:.02em; color:var(--accent); text-transform:none;}
 .zone-head h2.zt{font-size:20px; margin:4px 0 4px; font-weight:600;}
 .zone-head p{margin:0; color:var(--muted); font-size:13.5px; max-width:640px;}
@@ -176,7 +176,7 @@ footer.foot{margin-top:56px; padding-top:18px; border-top:1px solid var(--line);
 
 <header class="top">
   <div class="top-inner">
-    <div class="brand"><h1>RavenStack</h1><span class="tag">Torre de Retenção</span></div>
+    <div class="brand"><h1>RavenStack</h1><span class="tag">Torre de Retenção · protótipo exploratório</span></div>
     <div class="filters">
       <div><label style="font-size:11px;color:var(--muted);display:block;">Período</label>
         <select id="f-year"><option value="all">Todos (2023–2024)</option><option value="2023">2023</option><option value="2024">2024</option></select>
@@ -196,10 +196,10 @@ footer.foot{margin-top:56px; padding-top:18px; border-top:1px solid var(--line);
   </nav>
 </header>
 
-<div class="wrap">
+<div class="wrap">\n  <div class="notice"><strong>Objetivo deste material.</strong> Esta Torre de Retenção é um <strong>protótipo exploratório</strong> da fase documentada como <strong>Customer Value &amp; Revenue Intelligence (dados atuais)</strong>. Ela demonstra como filtros, sinais registrados e contas poderiam ser investigados de forma interativa. <strong>O Relatório Final é a fonte oficial das conclusões.</strong> Nenhum <code>churn_event</code>, <code>churn_flag</code> ou valor de subscription é tratado automaticamente como perda econômica comprovada.</div>
 
 <div class="zoneA">
-  <div class="zone-head"><div class="zk">ZONA 1 · SOB O FILTRO ATUAL</div><h2 class="zt">O que muda quando você filtra</h2><p>Estas seções respondem ao período/canal/plano escolhidos no topo. Mude o filtro e os números abaixo se recalculam — inclusive a fila de contas.</p></div>
+  <div class="zone-head"><div class="zk">ZONA 1 · SOB O FILTRO ATUAL</div><h2 class="zt">Exploração descritiva dos sinais registrados</h2><p>Período, canal e plano recalculam os registros abaixo. O objetivo é localizar padrões para investigação — não estimar churn econômico.</p></div>
 
   <section id="sec-brief">
     <div class="section-head"><div class="section-label">Leitura de 2 minutos</div><h2>Diagnóstico executivo</h2></div>
@@ -213,29 +213,29 @@ footer.foot{margin-top:56px; padding-top:18px; border-top:1px solid var(--line);
   </section>
 
   <section id="sec-reasons">
-    <div class="section-head"><div class="section-label">Motivos declarados</div><h2>Por que o cliente disse que estava saindo</h2><p>Motivo registrado no cancelamento — a explicação que o cliente deu, não a causa comprovada. Clique num motivo para ver a definição de trabalho.</p></div>
-    <div class="reason-toggle"><button class="chip active" data-metric="events">Em nº de eventos</button><button class="chip" data-metric="mrr">Em MRR (valor)</button></div>
+    <div class="section-head"><div class="section-label">Códigos de motivo</div><h2>Como os motivos aparecem nos eventos registrados</h2><p>Os códigos pertencem ao <code>churn_event</code>. Eles ajudam a organizar a investigação, mas não provam motivo de perda econômica.</p></div>
+    <div class="reason-toggle"><button class="chip active" data-metric="events">Em nº de eventos</button></div>
     <div id="reason-list"></div>
   </section>
 
   <section id="sec-segments">
-    <div class="section-head"><div class="section-label">Onde o risco se concentra</div><h2>Segmentos em risco</h2><p>Clique numa linha para ver as contas daquele segmento, no filtro atual.</p></div>
+    <div class="section-head"><div class="section-label">Distribuição dos sinais</div><h2>Como os registros variam por segmento</h2><p>Compare os registros por segmento. São sinais descritivos, não uma taxa validada de churn econômico.</p></div>
     <div class="seg-tabs" id="seg-tabs"></div>
     <div id="seg-table"></div>
   </section>
 
   <section id="sec-queue">
-    <div class="section-head"><div class="section-label">Fila operacional</div><h2>Contas ativas para olhar primeiro</h2><p>Regra transparente — soma pontos por downgrade recente, ticket escalado e nota de suporte baixa. Testamos um modelo de IA à parte; ele não previu melhor que o acaso, por isso a fila é por regra explicável, não por score de IA. Clique numa conta para ver a história completa.</p></div>
+    <div class="section-head"><div class="section-label">Protótipo de triagem</div><h2>Fila exploratória de contas com múltiplos sinais</h2><p>Esta fila demonstra uma regra explicável baseada em sinais registrados. <strong>Não é um score validado de churn</strong> e não deve acionar intervenção automática.</p></div>
     <div class="queue-note" id="queue-note"></div>
     <div class="table-scroll"><table class="data"><thead><tr><th>Conta</th><th>Indústria</th><th>Plano</th><th>Canal</th><th>MRR</th><th>Sinal de alerta</th></tr></thead><tbody id="queue-body"></tbody></table></div>
   </section>
 </div>
 
 <div class="zoneB">
-  <div class="zone-head"><div class="zk">ZONA 2 · VERDADE ESTRUTURAL DA BASE</div><h2 class="zt">O que não muda com o filtro</h2><p>Jornada, achados e recomendações abaixo olham as 500 contas inteiras — mudar o filtro no topo não altera esta parte, porque a pergunta aqui é sobre a base toda, não sobre um recorte.</p></div>
+  <div class="zone-head"><div class="zk">ZONA 2 · BASE COMPLETA</div><h2 class="zt">O que permanece quando olhamos as cinco fontes juntas</h2><p>Os blocos abaixo usam as 500 contas e seguem a interpretação do Relatório Final.</p></div>
 
   <section id="sec-journey">
-    <div class="section-head"><div class="section-label">Ciclo de vida</div><h2>A jornada da base — 500 contas</h2><p>Cada etapa é um recorte diferente da mesma base; uma conta pode estar em várias ao mesmo tempo.</p></div>
+    <div class="section-head"><div class="section-label">Sinais de lifecycle</div><h2>Leituras da base — não é um funil</h2><p>Os indicadores vêm de representações diferentes e não formam uma sequência canônica de jornada.</p></div>
     <div class="journey" id="journey"></div>
   </section>
 
@@ -245,7 +245,7 @@ footer.foot{margin-top:56px; padding-top:18px; border-top:1px solid var(--line);
   </section>
 
   <section id="sec-actions">
-    <div class="section-head"><div class="section-label">Recomendação</div><h2>O que fazer, em ordem</h2><p>Impacto estimado a partir dos números acima — é um cenário, não uma garantia.</p></div>
+    <div class="section-head"><div class="section-label">Prioridades</div><h2>O que fazer, em ordem</h2><p>As ações abaixo seguem o diagnóstico final: reconciliar a verdade econômica, investigar a qualidade do crescimento e operacionalizar a jornada.</p></div>
     <div id="actions-list"></div>
   </section>
 
