@@ -40,6 +40,7 @@ Entretanto, a documentação afirma que os IDs são chaves primárias únicas e 
 - **19.142 dos 25.000 registros de uso acontecem antes do início da assinatura à qual estão ligados**.
 - Outros 290 registros de uso ficam depois do encerramento da assinatura.
 - Apenas **5.568 registros de uso** estão dentro da janela temporal da própria assinatura.
+- Entre os 19.142 registros anteriores à assinatura vinculada, **4.689 acontecem durante outra assinatura paga da mesma conta**. Isso mostra que parte do problema está na associação do uso à linha de assinatura, e não necessariamente no uso em si.
 - Em Suporte, **1.077 dos 2.000 tickets aparecem antes do signup_date da conta**.
 
 ## Interpretação
@@ -48,7 +49,7 @@ A integridade referencial existe, mas **integridade referencial não significa c
 
 ## Decisão
 
-Uso e Suporte não seriam usados indiscriminadamente para explicar churn. Análises longitudinais só poderiam usar registros temporalmente coerentes, e qualquer interpretação dos tickets anteriores ao cadastro precisaria permanecer como hipótese.
+Uso e Suporte não seriam descartados. A decisão foi separar duas perguntas: **a linha de assinatura vinculada é temporalmente confiável?** e **a atividade da conta ainda pode ser analisada por outra referência temporal?**. Por isso, além da validação da subscription_id, Produto e Suporte foram reanalisados no nível da conta e da jornada, usando o signup como referência alternativa quando a pergunta permitia. Qualquer interpretação dos tickets anteriores ao cadastro permaneceu como hipótese.
 
 **Status:** documentação parcialmente refutada pelos próprios dados.
 
@@ -109,12 +110,21 @@ Os 600 eventos foram posicionados em relação às linhas pagas.
 
 Os dois eventos que aparecem entre relações pagas pertencem a contas que voltam a ter linha paga depois.
 
+A própria tabela de eventos contém sinais de que o nome "churn" agrega movimentos diferentes:
+
+- **61 dos 600 eventos** estão marcados como reativação;
+- **123** possuem upgrade precedente;
+- **53** possuem downgrade precedente.
+
 Também foram examinadas as linhas pagas encerradas:
 
 - **408 linhas pagas** têm end_date;
 - **399** possuem outra linha paga vigente na mesma data;
 - nas **9 restantes**, uma nova linha paga começa entre **3 e 157 dias depois**;
-- a soma do MRR das 408 linhas encerradas é **US$ 1.179.139**.
+- a soma do MRR das 408 linhas encerradas é **US$ 1.179.139**;
+- no corte de 31/12/2024, **todas as 500 contas possuem pelo menos uma linha paga ativa**.
+
+Isso não prova ausência de perda econômica ao longo da jornada. Prova que encerramento de linha e churn_event não podem ser convertidos automaticamente em perda definitiva da conta.
 
 ## Teste adicional: três representações de churn
 
@@ -426,30 +436,47 @@ Financeiro/RevOps deve reconciliar crédito, refund solicitado, refund liquidado
 
 Problemas de uso, erros ou baixa adoção poderiam explicar os eventos.
 
-## Teste de qualidade antes da comparação
+## Primeiro teste: qualidade do vínculo com assinatura
 
 Dos 25.000 registros:
 
 - **19.142** precedem o início da subscription associada;
 - **5.568** ficam dentro da janela da subscription;
-- 290 ficam depois do fim;
-- os 5.568 válidos cobrem 469 contas.
+- **290** ficam depois do fim;
+- **4.689 dos 19.142 registros anteriores** coincidem com outra assinatura paga da mesma conta;
+- existem **21 identificadores de uso repetidos**, envolvendo 42 das 25.000 linhas (0,17%). Isso não altera os principais resultados, mas confirma uma falha de chave que precisa ser corrigida.
 
-Além disso, existem **21 usage_id duplicados**, contrariando a unicidade descrita no README.
+A conclusão correta não é "19.432 registros são inúteis". É que a **subscription_id não é uma âncora temporal confiável para toda a base**.
 
-## Resultado da investigação
+## Segundo teste: recuperar a análise no nível da conta
 
-Nos registros temporalmente utilizáveis, não surgiu uma deterioração consistente capaz de explicar o fenômeno geral.
+Como cada subscription aponta para uma conta existente, o uso foi reanalisado pela jornada da conta, sem exigir que a data estivesse dentro da linha de assinatura originalmente vinculada.
+
+Para as 195 contas comparáveis de 2024, foi observado o uso nos **primeiros 90 dias após o signup**:
+
+- **2.940 registros de uso** entram nessa janela;
+- **194 das 195 contas** possuem pelo menos um registro;
+- mediana de registros: **6 com evento vs 6 sem evento**;
+- mediana de usage_count acumulado: **61 vs 60**;
+- duração acumulada mediana: **17.755 vs 18.258 segundos**;
+- funcionalidades distintas: **6 vs 6**;
+- dias distintos de uso: **6 vs 6**;
+- erros acumulados: **3 vs 4**.
 
 ## Interpretação
 
-Produto continua sendo hipótese possível para contas específicas, mas a base atual não sustenta “Produto causa o churn observado” como conclusão geral.
+A inconsistência da subscription_id não impediu toda análise de Produto. A abordagem alternativa recuperou cobertura quase completa da coorte comparável e **não mostrou uma deterioração consistente de adoção, intensidade, variedade ou frequência de uso nas contas com evento precoce**.
+
+Isso não prova que Produto nunca cause perda em contas específicas. Mostra apenas que, neste dataset, os indicadores disponíveis não sustentam Produto como explicação geral do aumento de eventos.
 
 ## Decisão
 
-Não construir causalidade nem modelo de risco sobre uso sem antes corrigir a relação temporal e definir o desfecho econômico.
+- não descartar a base de uso;
+- corrigir a relação conta → assinatura → uso para análises futuras;
+- manter Produto como sinal operacional e hipótese por conta;
+- não transformar uso em causa geral nem treinar modelo de churn enquanto o desfecho econômico continuar ambíguo.
 
-**Status: hipótese geral não confirmada.**
+**Status: hipótese geral não confirmada; análise recuperada por uma referência temporal alternativa.**
 
 ---
 
@@ -459,7 +486,7 @@ Não construir causalidade nem modelo de risco sobre uso sem antes corrigir a re
 
 Volume, lentidão, escalonamento ou satisfação de suporte poderiam anteceder os eventos.
 
-## Validação temporal
+## Primeiro teste: entender a temporalidade
 
 Dos 2.000 tickets:
 
@@ -475,15 +502,32 @@ Outros fatos:
 - os 1.077 tickets anteriores ao signup atingem 389 contas;
 - 825 tickets não possuem satisfaction_score.
 
+Isso impede chamar automaticamente os tickets anteriores ao cadastro de "pré-venda". Eles podem refletir atendimento anterior à formalização, backfill, outro significado de signup_date ou problema de data. A base não distingue essas explicações.
+
+## Segundo teste: suporte nos primeiros 90 dias após signup
+
+Para evitar depender dos tickets anteriores ao cadastro, a coorte comparável de 2024 foi reanalisada usando somente tickets entre signup e signup + 90 dias.
+
+Resultado:
+
+- **89 tickets**, distribuídos por **75 das 195 contas**;
+- mediana de tickets por conta: **0 com evento vs 0 sem evento**;
+- entre contas com ticket, resolução mediana: **36h vs 34,5h**;
+- primeira resposta mediana: **67 min vs 93 min**;
+- satisfação mediana: **4 vs 4**;
+- mediana de escalonamento: **0 vs 0**.
+
 ## Interpretação
 
-A base não representa exclusivamente suporte pós-venda. Uma hipótese é que parte do atendimento aconteça antes da formalização comercial; outras possibilidades são backfill, significado diferente de signup_date ou problema de data. Os dados não distinguem essas explicações.
+Não aparece um padrão consistente em que contas com evento precoce recebam sistematicamente mais tickets, atendimento mais lento, pior satisfação ou mais escalonamentos.
+
+A descoberta material de Suporte é dupla: **não há evidência para tratá-lo como causa geral** e **a base mistura momentos da jornada que hoje não conseguimos interpretar com segurança**.
 
 ## Decisão
 
-Não declarar Suporte como causa geral. Para novos tickets, registrar etapa da jornada e motivo do contato; para o histórico, validar amostra com a operação antes de classificar.
+Para o histórico, validar a semântica temporal antes de classificar os 1.077 tickets. Para novos tickets, registrar etapa da jornada, motivo, solução, pendência, área acionada e próximo passo.
 
-**Status causal: inconclusivo; problema de captura/semântica confirmado.**
+**Status causal: hipótese geral não confirmada; problema de captura/semântica confirmado.**
 
 ---
 
@@ -534,7 +578,7 @@ Não foram aceitas as seguintes conclusões:
    Não sustentada: Organic é o principal motor de crescimento em valor e precisa ser aberto em suborigens/jornadas.
 
 4. **Produto ou Suporte são a causa geral.**  
-   Não demonstrado e prejudicado por problemas temporais/semânticos.
+   Não demonstrado. As análises alternativas nos primeiros 90 dias após signup recuperaram Produto e Suporte sem depender das relações temporais problemáticas e não mostraram deterioração consistente nas contas com evento precoce.
 
 5. **Reason_code pode ser usado diretamente como causa raiz de perda.**  
    Não sustentado pela continuidade posterior.
@@ -585,7 +629,10 @@ O detalhamento operacional está em **IMPACTO_ESTIMADO_ACOES.md**.
 |---|---|---|---|
 | 19,4% → 47,2% de eventos precoces | accounts + churn_events | investigar sem chamar de churn econômico | Relatório Final |
 | 42,9% no teste de sensibilidade | accounts + churn_events + cutoff | não atribuir todo o salto a piora | Relatório Final + script |
-| 531 eventos durante linha paga | churn_events + subscriptions | separar evento de perda | Relatório Final |
+| 531 eventos durante linha paga; 61 reativações; 123 upgrades; 53 downgrades precedentes | churn_events + subscriptions | separar evento de perda | Relatório Final |
+| 500/500 contas com linha paga ativa no corte | subscriptions | não tratar encerramento de linha como perda definitiva | Relatório + Plano |
+| 2.940 usos nos primeiros 90d; cobertura 194/195 | usage + accounts + subscriptions | Produto não explica o fenômeno geral; preservar e corrigir vínculo temporal | Relatório + Reprodução |
+| 89 tickets em 75/195 contas nos primeiros 90d | support + accounts | Suporte não explica o fenômeno geral; corrigir contexto de jornada | Relatório + Plano |
 | 400/500 contas em desacordo | três representações de churn | Revenue Truth | Relatório + Plano de Ação |
 | Organic = 64,6% do novo valor | accounts + subscriptions | proteger e abrir canal | Relatório + Plano |
 | 14/22 Organic × Enterprise | aquisição + assinatura + evento | reconstruir jornadas | Relatório + Plano |
