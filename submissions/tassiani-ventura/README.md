@@ -1,5 +1,7 @@
 # Submissão — Tassiani Ventura — Challenge 001
 
+> **Outra entrega nesta submissão:** [Challenge 004 — Estratégia Social Media](./challenge-004/README.md), com análise das cinco plataformas, relatórios, notebook e aplicativo Streamlit.
+
 ## Sobre mim
 
 - **Nome:** Tassiani Ventura
