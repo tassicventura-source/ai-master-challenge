@@ -16,18 +16,22 @@ Analisei os dados das cinco plataformas de forma separada, com uma arquitetura d
 
 ---
 
+## Aplicativo online
+
+[Abrir Social Media Performance Intelligence](https://ai-master-challenge-m5yj4ywoyiacfym9wcgjrj.streamlit.app/)
+
 ## Acesso às entregas
 
 | Entrega | Link |
 |---|---|
 | Relatório estratégico final | [Baixar HTML](./solution/reports/Relatorio_Final_Social_Media.html) |
-| Aplicativo Streamlit | [Código, execução e configuração do deploy](./solution/README.md) |
+| Aplicativo Streamlit | [Abrir aplicativo online](https://ai-master-challenge-m5yj4ywoyiacfym9wcgjrj.streamlit.app/) · [Código e execução](./solution/README.md) |
 | Notebook executado | [Investigação das cinco plataformas](./solution/notebooks/Investigacao_Social_Media_EXECUTADA.ipynb) |
 | Process Log | [PROCESS_LOG.pdf](./process-log/PROCESS_LOG.pdf) |
 | Validação técnica | [Correções e testes de preparação para publicação](./solution/VALIDACAO.md) |
 | Challenge 001 — Diagnóstico de Churn | [Entrega anterior e aplicativo RavenStack](../README.md) |
 
-Os arquivos HTML devem ser baixados e abertos no navegador; o GitHub exibe seu código. Também estão disponíveis para download na barra lateral do aplicativo. O endereço público do aplicativo será incluído após o deploy no Streamlit.
+Os arquivos HTML devem ser baixados e abertos no navegador; o GitHub exibe seu código. Também estão disponíveis para download na barra lateral do aplicativo.
 
 ### Detalhamento por plataforma
 
@@ -102,7 +106,7 @@ A IA executou os cálculos, cruzamentos e programação do motor, notebook, dash
 
 1. Defini blocos de tempo de 60 minutos e um temporizador de 4 horas, porque meu objetivo era usar o mínimo de tempo possível e orientar meus passos com o tempo. Basicamente analisei nos primeiros 15 minutos o que tínhamos e pedi pra IA uma primeira estruturação dos dados e criação de um notebook.
 2. Enquanto analisava, construí uma arquitetura lógica para investigarmos, ou seja, perguntas específicas, divididas por categorias.
-3. A IA fez esse processo, e junto construíu um dashboard para qualquer pessoa conseguir analisar e cruzar dados também
+3. A IA fez esse processo, e junto construiu um dashboard para qualquer pessoa conseguir analisar e cruzar dados também
 4. Tanto eu, quanto a IA analisamos e cruzamos os dados antes de decidir o que viraria estratégia
 5. A partir dos principais insights finalizei os entregáveis finais.
 
@@ -116,7 +120,7 @@ Também houve momentos em que a IA transformou pequenas vantagens numéricas em 
 
 Meu principal papel foi não aceitar a primeira resposta.
 
-Eu defini quais perguntas realmente mudariam uma decisão de Marketing, percebi quando a análise estava confundindo ranking com insight, trouxe a necessidade de reconstruír o comportamento ao longo dos dois anos e insisti que toda recomendação pudesse ser rastreada até a evidência que a sustenta.
+Eu defini quais perguntas realmente mudariam uma decisão de Marketing, percebi quando a análise estava confundindo ranking com insight, trouxe a necessidade de reconstruir o comportamento ao longo dos dois anos e insisti que toda recomendação pudesse ser rastreada até a evidência que a sustenta.
 
 Também decidi transformar a análise em uma ferramenta de investigação contínua. Em vez de entregar apenas minhas conclusões, quis que outra pessoa pudesse entrar no dashboard, fazer novos cruzamentos e questionar os mesmos dados.
 
@@ -132,6 +136,7 @@ Ao longo do processo foram **15 iterações com a IA**.
 
 ## Evidências
 
+- [x] [Aplicativo publicado no Streamlit](https://ai-master-challenge-m5yj4ywoyiacfym9wcgjrj.streamlit.app/)
 - [x] [Screenshots e narrativa do processo](./process-log/PROCESS_LOG.pdf)
 - [x] [Notebook executado com a investigação das cinco plataformas](./solution/notebooks/Investigacao_Social_Media_EXECUTADA.ipynb)
 

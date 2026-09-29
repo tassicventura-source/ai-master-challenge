@@ -4,7 +4,11 @@
 
 Aplicativo analítico em Streamlit para Instagram, TikTok, YouTube, Bilibili e RedNote. Inclui filtros, objetivos, patrocínio, tempo, audiência, cruzamentos, auditoria e registros brutos.
 
-## Publicar no Streamlit Community Cloud
+## Aplicativo online
+
+[Abrir Social Media Performance Intelligence](https://ai-master-challenge-m5yj4ywoyiacfym9wcgjrj.streamlit.app/)
+
+## Configuração no Streamlit Community Cloud
 
 | Campo | Valor |
 |---|---|
@@ -14,7 +18,7 @@ Aplicativo analítico em Streamlit para Instagram, TikTok, YouTube, Bilibili e R
 | Python | `3.12` |
 | Secrets | Não necessários |
 
-Use esses campos em **Create app → Deploy an app from GitHub** e clique em **Deploy**. O link público só existe depois que o Streamlit concluir a publicação; adicione-o ao [README da submissão](../README.md).
+O aplicativo está publicado com essa configuração. Para reproduzir o deploy, use esses campos em **Create app → Deploy an app from GitHub** e clique em **Deploy**.
 
 A base está comprimida em gzip, sem alteração de conteúdo; o motor abre o arquivo diretamente. O aplicativo carrega a base incluída em `data/social_media_dataset.csv.gz`. É uma ferramenta de consulta: filtros pertencem à sessão e não há gravação de alterações nem dependência de banco de dados.
 

@@ -8,7 +8,7 @@
 
 Minha trajetória passou por conteúdo, gestão de projetos, liderança, processos e aquisição, dentro do marketing digital. Hoje sigo trabalhando isso, conectando liderança e produtividade. Acredito que pessoas, processos e tecnologia são pilares fundamentais hoje em dia. Foi isso que quis explorar neste desafio.
 
-> **Outra entrega nesta submissão:** [Challenge 004 — Estratégia Social Media](./challenge-004/README.md), com análise das cinco plataformas, relatórios, notebook e aplicativo Streamlit.
+> **Outra entrega nesta submissão:** [Challenge 004 — Estratégia Social Media](./challenge-004/README.md), com análise das cinco plataformas, relatórios, notebook e [aplicativo online](https://ai-master-challenge-m5yj4ywoyiacfym9wcgjrj.streamlit.app/).
 ---
 
 ## Executive Summary
